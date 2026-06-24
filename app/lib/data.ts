@@ -142,9 +142,10 @@ export async function fetchInvoicesPages(query: string) {
   }
 }
 
-export async function fetchInvoiceById(id: string) {
+export async function fetchInvoiceById(id?: string) {
   if (!id) {
-    return undefined;
+    console.log('fetchInvoiceById called without id');
+    return null;
   }
 
   try {
@@ -163,10 +164,10 @@ export async function fetchInvoiceById(id: string) {
       amount: invoice.amount / 100,
     }));
 
-    return invoice[0];
+    return invoice[0] || null;
   } catch (error) {
     console.error('Database Error:', error);
-    throw new Error('Failed to fetch invoice.');
+    return null;
   }
 }
 
