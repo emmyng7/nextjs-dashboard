@@ -17,17 +17,7 @@ import {
   type Customer,
 } from "@/app/lib/services/customerService";
 
-interface Customer {
-  id: number;
-  name: string;
-  email: string;
-  phone: string;
-  company: string;
-  totalSpent: number;
-  invoices: number;
-  status: 'active' | 'inactive';
-  createdAt: string;
-}
+
 
 export default function CustomersPage() {
   const [customers, setCustomers] = useState<Customer[]>([]);
