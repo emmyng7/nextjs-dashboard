@@ -9,7 +9,13 @@ import {
   XMarkIcon,
   CheckIcon
 } from "@heroicons/react/24/outline";
-import { fetchCustomers, createCustomer, updateCustomer, deleteCustomer } from "@/app/lib/services/customerService";
+import {
+  fetchCustomers,
+  createCustomer,
+  updateCustomer,
+  deleteCustomer,
+  type Customer,
+} from "@/app/lib/services/customerService";
 
 interface Customer {
   id: number;
