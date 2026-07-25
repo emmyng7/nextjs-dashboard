@@ -12,6 +12,14 @@ export interface Customer {
   createdAt: string;
 }
 
+export interface CustomerInvoice {
+  id: number;
+  invoiceNumber: string;
+  amount: number;
+  status: "paid" | "pending" | "overdue";
+  date: string;
+}
+
 const mockCustomers: Customer[] = [
   {
     id: 1,
@@ -64,6 +72,41 @@ export async function fetchCustomerById(
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve(mockCustomers.find((c) => c.id === id));
+    }, 500);
+  });
+}
+
+// Fetch customer invoices
+export async function fetchCustomerInvoices(
+  customerId: number
+): Promise<CustomerInvoice[]> {
+  const mockInvoices: CustomerInvoice[] = [
+    {
+      id: 1,
+      invoiceNumber: "INV-001",
+      amount: 250,
+      status: "paid",
+      date: "2024-06-15",
+    },
+    {
+      id: 2,
+      invoiceNumber: "INV-002",
+      amount: 350,
+      status: "pending",
+      date: "2024-06-20",
+    },
+    {
+      id: 3,
+      invoiceNumber: "INV-003",
+      amount: 150,
+      status: "overdue",
+      date: "2024-05-10",
+    },
+  ];
+
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(mockInvoices);
     }, 500);
   });
 }
