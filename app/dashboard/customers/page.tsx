@@ -1,23 +1,33 @@
+
+
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { 
   PlusIcon, 
   PencilIcon, 
   TrashIcon, 
   MagnifyingGlassIcon,
   XMarkIcon,
-  CheckIcon
+  CheckIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon
 } from "@heroicons/react/24/outline";
-import {
-  fetchCustomers,
-  createCustomer,
-  updateCustomer,
-  deleteCustomer,
-  type Customer,
-} from "@/app/lib/services/customerService";
+import { fetchCustomers, createCustomer, updateCustomer, deleteCustomer } from "@/app/lib/services/customerService";
+import toast from 'react-hot-toast';
 
-
+interface Customer {
+  id: number;
+  name: string;
+  email: string;
+  phone: string;
+  company: string;
+  totalSpent: number;
+  invoices: number;
+  status: 'active' | 'inactive';
+  createdAt: string;
+}
 
 export default function CustomersPage() {
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -33,6 +43,10 @@ export default function CustomersPage() {
     status: "active" as 'active' | 'inactive',
   });
   const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(6);
 
   // Fetch customers on mount
   useEffect(() => {
@@ -43,9 +57,10 @@ export default function CustomersPage() {
     setLoading(true);
     try {
       const data = await fetchCustomers();
-      setCustomers(data);
+      setCustomers(data as Customer[]);
     } catch (error) {
       console.error("Failed to load customers:", error);
+      toast.error('Failed to load customers');
     } finally {
       setLoading(false);
     }
@@ -57,6 +72,21 @@ export default function CustomersPage() {
     customer.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
     customer.company.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  // Pagination logic
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredCustomers.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredCustomers.length / itemsPerPage);
+
+  const handlePageChange = (pageNumber: number) => {
+    setCurrentPage(pageNumber);
+  };
+
+  // Reset to page 1 when search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
 
   // Open modal for adding/editing
   const openModal = (customer: Customer | null = null) => {
@@ -107,18 +137,18 @@ export default function CustomersPage() {
 
     try {
       if (editingCustomer) {
-        // Update existing customer
         await updateCustomer(editingCustomer.id, formData);
         await loadCustomers();
+        toast.success('Customer updated successfully!');
       } else {
-        // Add new customer
         await createCustomer(formData);
         await loadCustomers();
+        toast.success('Customer added successfully!');
       }
       closeModal();
     } catch (error) {
       console.error("Failed to save customer:", error);
-      alert("Failed to save customer. Please try again.");
+      toast.error('Failed to save customer');
     } finally {
       setLoading(false);
     }
@@ -131,9 +161,10 @@ export default function CustomersPage() {
       await deleteCustomer(customerId);
       await loadCustomers();
       setDeleteConfirm(null);
+      toast.success('Customer deleted successfully');
     } catch (error) {
       console.error("Failed to delete customer:", error);
-      alert("Failed to delete customer. Please try again.");
+      toast.error('Failed to delete customer');
     } finally {
       setLoading(false);
     }
@@ -149,151 +180,250 @@ export default function CustomersPage() {
   };
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Customers</h1>
-          <p className="text-sm text-gray-500 mt-1">
-            Manage your customer relationships
-          </p>
-        </div>
+    <div className="w-full">
+      <div className="flex w-full items-center justify-between">
+        <h1 className="text-2xl font-semibold text-gray-900">Customers</h1>
         <button
           onClick={() => openModal()}
-          className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors shadow-sm"
+          className="flex items-center gap-1 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
         >
           <PlusIcon className="h-5 w-5" />
-          Add Customer
+          Create Customer
         </button>
       </div>
 
-      {/* Search Bar */}
-      <div className="relative mb-6">
-        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
+      {/* Search */}
+      <div className="mt-4 flex items-center justify-between gap-2 md:mt-8">
+        <div className="relative flex flex-1 flex-shrink-0">
+          <label htmlFor="search" className="sr-only">
+            Search
+          </label>
+          <input
+            id="search"
+            type="text"
+            placeholder="Search customers..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="peer block w-full rounded-md border border-gray-200 py-[9px] pl-10 text-sm outline-2 placeholder:text-gray-500"
+          />
+          <MagnifyingGlassIcon className="absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
         </div>
-        <input
-          type="text"
-          placeholder="Search customers by name, email, or company..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-        />
       </div>
 
-      {/* Customer Table */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Customer
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Contact
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Company
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Total Spent
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Invoices
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Joined
-                </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+      {/* Customers Table */}
+      <div className="mt-6 flow-root">
+        <div className="inline-block min-w-full align-middle">
+          <div className="rounded-lg bg-gray-50 p-2 md:pt-0">
+            <div className="md:hidden">
+              {/* Mobile View */}
               {loading ? (
-                <tr>
-                  <td colSpan={8} className="px-6 py-12 text-center text-gray-500">
-                    Loading customers...
-                  </td>
-                </tr>
-              ) : filteredCustomers.length === 0 ? (
-                <tr>
-                  <td colSpan={8} className="px-6 py-12 text-center text-gray-500">
-                    No customers found
-                  </td>
-                </tr>
+                <div className="text-center py-8 text-gray-500">Loading customers...</div>
+              ) : currentItems.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  {searchTerm ? 'No customers match your search' : 'No customers found'}
+                </div>
               ) : (
-                filteredCustomers.map((customer) => (
-                  <tr key={customer.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div className="h-10 w-10 flex-shrink-0">
-                          <div className="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-semibold">
-                            {customer.name.charAt(0).toUpperCase()}
-                          </div>
-                        </div>
-                        <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">
-                            {customer.name}
-                          </div>
-                        </div>
+                currentItems.map((customer) => (
+                  <div key={customer.id} className="mb-2 w-full rounded-md bg-white p-4">
+                    <div className="flex items-center justify-between border-b pb-4">
+                      <div>
+                        <Link 
+                          href={`/dashboard/customers/${customer.id}`}
+                          className="text-sm font-medium text-gray-900 hover:text-blue-600"
+                        >
+                          {customer.name}
+                        </Link>
+                        <p className="text-sm text-gray-500">{customer.email}</p>
                       </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{customer.email}</div>
-                      <div className="text-sm text-gray-500">{customer.phone}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {customer.company}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      ${customer.totalSpent.toFixed(2)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {customer.invoices}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusBadge(customer.status)}`}>
                         {customer.status.charAt(0).toUpperCase() + customer.status.slice(1)}
                       </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {new Date(customer.createdAt).toLocaleDateString()}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <div className="flex items-center justify-end gap-2">
+                    </div>
+                    <div className="flex w-full items-center justify-between pt-4">
+                      <div>
+                        <p className="text-sm text-gray-500">Company</p>
+                        <p className="text-sm font-medium">{customer.company}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-500">Total Spent</p>
+                        <p className="text-sm font-medium">${customer.totalSpent.toFixed(2)}</p>
+                      </div>
+                      <div className="flex justify-end gap-2">
                         <button
                           onClick={() => openModal(customer)}
-                          className="p-1 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
-                          title="Edit customer"
+                          className="rounded-md border p-2 hover:bg-gray-100"
                         >
-                          <PencilIcon className="h-5 w-5" />
+                          <PencilIcon className="w-5 text-gray-500" />
                         </button>
                         <button
                           onClick={() => setDeleteConfirm(customer.id)}
-                          className="p-1 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                          title="Delete customer"
+                          className="rounded-md border p-2 hover:bg-gray-100"
                         >
-                          <TrashIcon className="h-5 w-5" />
+                          <TrashIcon className="w-5 text-red-500" />
                         </button>
                       </div>
-                    </td>
-                  </tr>
+                    </div>
+                  </div>
                 ))
               )}
-            </tbody>
-          </table>
+            </div>
+
+            {/* Desktop View */}
+            <table className="hidden min-w-full text-gray-900 md:table">
+              <thead className="rounded-lg text-left text-sm font-normal">
+                <tr>
+                  <th scope="col" className="px-4 py-5 font-medium sm:pl-6">
+                    Customer
+                  </th>
+                  <th scope="col" className="px-3 py-5 font-medium">
+                    Email
+                  </th>
+                  <th scope="col" className="px-3 py-5 font-medium">
+                    Company
+                  </th>
+                  <th scope="col" className="px-3 py-5 font-medium">
+                    Total Spent
+                  </th>
+                  <th scope="col" className="px-3 py-5 font-medium">
+                    Invoices
+                  </th>
+                  <th scope="col" className="px-3 py-5 font-medium">
+                    Status
+                  </th>
+                  <th scope="col" className="relative py-3 pl-6 pr-3">
+                    <span className="sr-only">Actions</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white">
+                {loading ? (
+                  <tr>
+                    <td colSpan={7} className="px-4 py-8 text-center text-gray-500">
+                      Loading customers...
+                    </td>
+                  </tr>
+                ) : currentItems.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="px-4 py-8 text-center text-gray-500">
+                      {searchTerm ? 'No customers match your search' : 'No customers found'}
+                    </td>
+                  </tr>
+                ) : (
+                  currentItems.map((customer) => (
+                    <tr key={customer.id} className="w-full border-b py-3 text-sm last-of-type:border-none [&:first-child>td:first-child]:rounded-tl-lg [&:first-child>td:last-child]:rounded-tr-lg [&:last-child>td:first-child]:rounded-bl-lg [&:last-child>td:last-child]:rounded-br-lg">
+                      <td className="whitespace-nowrap py-3 pl-6 pr-3">
+                        <div className="flex items-center gap-3">
+                          <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-semibold">
+                            {customer.name.charAt(0).toUpperCase()}
+                          </div>
+                          <Link 
+                            href={`/dashboard/customers/${customer.id}`}
+                            className="font-medium text-gray-900 hover:text-blue-600"
+                          >
+                            {customer.name}
+                          </Link>
+                        </div>
+                      </td>
+                      <td className="whitespace-nowrap px-3 py-3">
+                        {customer.email}
+                      </td>
+                      <td className="whitespace-nowrap px-3 py-3">
+                        {customer.company}
+                      </td>
+                      <td className="whitespace-nowrap px-3 py-3">
+                        ${customer.totalSpent.toFixed(2)}
+                      </td>
+                      <td className="whitespace-nowrap px-3 py-3">
+                        {customer.invoices}
+                      </td>
+                      <td className="whitespace-nowrap px-3 py-3">
+                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusBadge(customer.status)}`}>
+                          {customer.status.charAt(0).toUpperCase() + customer.status.slice(1)}
+                        </span>
+                      </td>
+                      <td className="whitespace-nowrap py-3 pl-6 pr-3">
+                        <div className="flex justify-end gap-3">
+                          <button
+                            onClick={() => openModal(customer)}
+                            className="rounded-md border p-2 hover:bg-gray-100"
+                          >
+                            <PencilIcon className="w-5 text-gray-500" />
+                          </button>
+                          <button
+                            onClick={() => setDeleteConfirm(customer.id)}
+                            className="rounded-md border p-2 hover:bg-gray-100"
+                          >
+                            <TrashIcon className="w-5 text-red-500" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+
+            {/* Pagination */}
+            {!loading && filteredCustomers.length > 0 && (
+              <div className="mt-5 flex w-full justify-center">
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    className="flex h-10 w-10 items-center justify-center rounded-md border border-gray-200 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <ChevronLeftIcon className="h-5 w-5" />
+                  </button>
+                  
+                  <div className="flex items-center gap-1">
+                    {[...Array(totalPages)].map((_, index) => {
+                      const pageNumber = index + 1;
+                      if (
+                        pageNumber === 1 ||
+                        pageNumber === totalPages ||
+                        Math.abs(pageNumber - currentPage) <= 1
+                      ) {
+                        return (
+                          <button
+                            key={pageNumber}
+                            onClick={() => handlePageChange(pageNumber)}
+                            className={`flex h-10 w-10 items-center justify-center rounded-md text-sm font-medium transition-colors ${
+                              currentPage === pageNumber
+                                ? 'bg-blue-600 text-white'
+                                : 'border border-gray-200 bg-white text-gray-500 hover:bg-gray-50 hover:text-gray-700'
+                            }`}
+                          >
+                            {pageNumber}
+                          </button>
+                        );
+                      } else if (
+                        (pageNumber === 2 && currentPage > 3) ||
+                        (pageNumber === totalPages - 1 && currentPage < totalPages - 2)
+                      ) {
+                        return <span key={pageNumber} className="px-1">...</span>;
+                      }
+                      return null;
+                    })}
+                  </div>
+
+                  <button
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                    className="flex h-10 w-10 items-center justify-center rounded-md border border-gray-200 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <ChevronRightIcon className="h-5 w-5" />
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
       {/* Delete Confirmation Modal */}
       {deleteConfirm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-6 max-w-md w-full mx-4 shadow-xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
             <h3 className="text-lg font-semibold text-gray-900 mb-2">
               Delete Customer
             </h3>
@@ -303,13 +433,13 @@ export default function CustomersPage() {
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => setDeleteConfirm(null)}
-                className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={() => handleDelete(deleteConfirm)}
-                className="px-4 py-2 bg-red-600 text-white hover:bg-red-700 rounded-lg transition-colors"
+                className="px-4 py-2 text-sm bg-red-600 text-white hover:bg-red-700 rounded-md transition-colors"
               >
                 Delete Customer
               </button>
@@ -320,15 +450,15 @@ export default function CustomersPage() {
 
       {/* Add/Edit Customer Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl max-w-md w-full shadow-xl max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-white rounded-lg max-w-md w-full shadow-xl max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center p-6 border-b border-gray-200">
               <h2 className="text-xl font-semibold text-gray-900">
                 {editingCustomer ? "Edit Customer" : "Add New Customer"}
               </h2>
               <button
                 onClick={closeModal}
-                className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
+                className="p-1 hover:bg-gray-100 rounded-md transition-colors"
               >
                 <XMarkIcon className="h-6 w-6 text-gray-500" />
               </button>
@@ -345,7 +475,7 @@ export default function CustomersPage() {
                   required
                   value={formData.name}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                   placeholder="John Doe"
                 />
               </div>
@@ -360,7 +490,7 @@ export default function CustomersPage() {
                   required
                   value={formData.email}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                   placeholder="john@example.com"
                 />
               </div>
@@ -374,7 +504,7 @@ export default function CustomersPage() {
                   name="phone"
                   value={formData.phone}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                   placeholder="+1 (555) 123-4567"
                 />
               </div>
@@ -388,7 +518,7 @@ export default function CustomersPage() {
                   name="company"
                   value={formData.company}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                   placeholder="Company Name"
                 />
               </div>
@@ -401,7 +531,7 @@ export default function CustomersPage() {
                   name="status"
                   value={formData.status}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                 >
                   <option value="active">Active</option>
                   <option value="inactive">Inactive</option>
@@ -412,14 +542,14 @@ export default function CustomersPage() {
                 <button
                   type="button"
                   onClick={closeModal}
-                  className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                  className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="px-4 py-2 bg-indigo-600 text-white hover:bg-indigo-700 rounded-lg transition-colors flex items-center gap-2 disabled:opacity-50"
+                  className="px-4 py-2 text-sm bg-blue-600 text-white hover:bg-blue-700 rounded-md transition-colors flex items-center gap-2 disabled:opacity-50"
                 >
                   <CheckIcon className="h-5 w-5" />
                   {editingCustomer ? "Update Customer" : "Add Customer"}
