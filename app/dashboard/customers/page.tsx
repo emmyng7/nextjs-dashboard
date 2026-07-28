@@ -125,7 +125,6 @@ export default function CustomersPage() {
     company: "",
     status: "active" as 'active' | 'inactive',
   });
-  // Removed deleteConfirm state
 
   // Fetch customers on mount
   useEffect(() => {
@@ -218,18 +217,22 @@ export default function CustomersPage() {
     }
   };
 
-  // Delete customer IMMEDIATELY
+  // Delete customer INSTANTLY - NO LOADING
   const handleDelete = async (customerId: number) => {
-    setLoading(true);
     try {
+      // 1. Instantly remove it from the local UI state (No loading/pulsing)
+      setCustomers((prevCustomers) => prevCustomers.filter((c) => c.id !== customerId));
+
+      // 2. Send the delete request to the server in the background
       await deleteCustomer(customerId);
-      await loadCustomers();
+      
       toast.success('Customer deleted successfully');
     } catch (error) {
       console.error("Failed to delete customer:", error);
       toast.error('Failed to delete customer');
-    } finally {
-      setLoading(false);
+      
+      // If the server delete fails, you might want to re-fetch to restore the user in the list
+      loadCustomers(); 
     }
   };
 
@@ -424,8 +427,8 @@ export default function CustomersPage() {
           </div>
         </div>
       )}
-
-      {/* Modal for Add/Edit ONLY (Delete Modal has been removed) */}
+      
+      {/* Add/Edit Customer Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="bg-white rounded-lg max-w-md w-full shadow-xl max-h-[90vh] overflow-y-auto">
