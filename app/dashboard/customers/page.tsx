@@ -25,7 +25,7 @@ interface Customer {
   createdAt: string;
 }
 
-// --- NEW: Skeleton Loading Component ---
+// --- Skeleton Loading Component ---
 const CustomerTableSkeleton = () => {
   return (
     <div className="mt-6 flow-root">
@@ -126,10 +126,6 @@ export default function CustomersPage() {
     status: "active" as 'active' | 'inactive',
   });
   const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
-  
-  // Pagination state
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(6);
 
   // Fetch customers on mount
   useEffect(() => {
@@ -155,21 +151,6 @@ export default function CustomersPage() {
     customer.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
     customer.company.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
-  // Pagination logic
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = filteredCustomers.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil(filteredCustomers.length / itemsPerPage);
-
-  const handlePageChange = (pageNumber: number) => {
-    setCurrentPage(pageNumber);
-  };
-
-  // Reset to page 1 when search changes
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm]);
 
   // Open modal for adding/editing
   const openModal = (customer: Customer | null = null) => {
@@ -302,12 +283,12 @@ export default function CustomersPage() {
             <div className="rounded-lg bg-gray-50 p-2 md:pt-0">
               <div className="md:hidden">
                 {/* Mobile View */}
-                {currentItems.length === 0 ? (
+                {filteredCustomers.length === 0 ? (
                   <div className="text-center py-8 text-gray-500">
                     {searchTerm ? 'No customers match your search' : 'No customers found'}
                   </div>
                 ) : (
-                  currentItems.map((customer) => (
+                  filteredCustomers.map((customer) => (
                     <div key={customer.id} className="mb-2 w-full rounded-md bg-white p-4">
                       <div className="flex items-center justify-between border-b pb-4">
                         <div>
@@ -380,14 +361,14 @@ export default function CustomersPage() {
                   </tr>
                 </thead>
                 <tbody className="bg-white">
-                  {currentItems.length === 0 ? (
+                  {filteredCustomers.length === 0 ? (
                     <tr>
                       <td colSpan={7} className="px-4 py-8 text-center text-gray-500">
                         {searchTerm ? 'No customers match your search' : 'No customers found'}
                       </td>
                     </tr>
                   ) : (
-                    currentItems.map((customer) => (
+                    filteredCustomers.map((customer) => (
                       <tr key={customer.id} className="w-full border-b py-3 text-sm last-of-type:border-none [&:first-child>td:first-child]:rounded-tl-lg [&:first-child>td:last-child]:rounded-tr-lg [&:last-child>td:first-child]:rounded-bl-lg [&:last-child>td:last-child]:rounded-br-lg">
                         <td className="whitespace-nowrap py-3 pl-6 pr-3">
                           <div className="flex items-center gap-3">
@@ -440,42 +421,6 @@ export default function CustomersPage() {
                   )}
                 </tbody>
               </table>
-
-              {/* Pagination (No Arrows) */}
-              {!loading && filteredCustomers.length > 0 && (
-                <div className="mt-5 flex w-full justify-center">
-                  <div className="flex items-center gap-1">
-                    {[...Array(totalPages)].map((_, index) => {
-                      const pageNumber = index + 1;
-                      if (
-                        pageNumber === 1 ||
-                        pageNumber === totalPages ||
-                        Math.abs(pageNumber - currentPage) <= 1
-                      ) {
-                        return (
-                          <button
-                            key={pageNumber}
-                            onClick={() => handlePageChange(pageNumber)}
-                            className={`flex h-10 w-10 items-center justify-center rounded-md text-sm font-medium transition-colors ${
-                              currentPage === pageNumber
-                                ? 'bg-blue-600 text-white'
-                                : 'border border-gray-200 bg-white text-gray-500 hover:bg-gray-50 hover:text-gray-700'
-                            }`}
-                          >
-                            {pageNumber}
-                          </button>
-                        );
-                      } else if (
-                        (pageNumber === 2 && currentPage > 3) ||
-                        (pageNumber === totalPages - 1 && currentPage < totalPages - 2)
-                      ) {
-                        return <span key={pageNumber} className="px-1 text-gray-500">...</span>;
-                      }
-                      return null;
-                    })}
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         </div>
