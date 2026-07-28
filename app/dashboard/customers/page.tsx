@@ -125,7 +125,7 @@ export default function CustomersPage() {
     company: "",
     status: "active" as 'active' | 'inactive',
   });
-  const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
+  // Removed deleteConfirm state
 
   // Fetch customers on mount
   useEffect(() => {
@@ -218,13 +218,12 @@ export default function CustomersPage() {
     }
   };
 
-  // Delete customer
+  // Delete customer IMMEDIATELY
   const handleDelete = async (customerId: number) => {
     setLoading(true);
     try {
       await deleteCustomer(customerId);
       await loadCustomers();
-      setDeleteConfirm(null);
       toast.success('Customer deleted successfully');
     } catch (error) {
       console.error("Failed to delete customer:", error);
@@ -321,7 +320,7 @@ export default function CustomersPage() {
                             <PencilIcon className="w-5 text-gray-500" />
                           </button>
                           <button
-                            onClick={() => setDeleteConfirm(customer.id)}
+                            onClick={() => handleDelete(customer.id)}
                             className="rounded-md border p-2 hover:bg-gray-100"
                           >
                             <TrashIcon className="w-5 text-red-500" />
@@ -409,7 +408,7 @@ export default function CustomersPage() {
                               <PencilIcon className="w-5 text-gray-500" />
                             </button>
                             <button
-                              onClick={() => setDeleteConfirm(customer.id)}
+                              onClick={() => handleDelete(customer.id)}
                               className="rounded-md border p-2 hover:bg-gray-100"
                             >
                               <TrashIcon className="w-5 text-red-500" />
@@ -426,35 +425,7 @@ export default function CustomersPage() {
         </div>
       )}
 
-      {/* Delete Confirmation Modal */}
-      {deleteConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              Delete Customer
-            </h3>
-            <p className="text-gray-600 mb-6">
-              Are you sure you want to delete this customer? This action cannot be undone.
-            </p>
-            <div className="flex justify-end gap-3">
-              <button
-                onClick={() => setDeleteConfirm(null)}
-                className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => handleDelete(deleteConfirm)}
-                className="px-4 py-2 text-sm bg-red-600 text-white hover:bg-red-700 rounded-md transition-colors"
-              >
-                Delete Customer
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Add/Edit Customer Modal */}
+      {/* Modal for Add/Edit ONLY (Delete Modal has been removed) */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="bg-white rounded-lg max-w-md w-full shadow-xl max-h-[90vh] overflow-y-auto">
