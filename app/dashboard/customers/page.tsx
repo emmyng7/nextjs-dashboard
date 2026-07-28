@@ -1,5 +1,3 @@
-
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -10,9 +8,7 @@ import {
   TrashIcon, 
   MagnifyingGlassIcon,
   XMarkIcon,
-  CheckIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon
+  CheckIcon
 } from "@heroicons/react/24/outline";
 import { fetchCustomers, createCustomer, updateCustomer, deleteCustomer } from "@/app/lib/services/customerService";
 import toast from 'react-hot-toast';
@@ -28,6 +24,93 @@ interface Customer {
   status: 'active' | 'inactive';
   createdAt: string;
 }
+
+// --- NEW: Skeleton Loading Component ---
+const CustomerTableSkeleton = () => {
+  return (
+    <div className="mt-6 flow-root">
+      <div className="inline-block min-w-full align-middle">
+        <div className="rounded-lg bg-gray-50 p-2 md:pt-0">
+          <div className="md:hidden space-y-3">
+            {/* Mobile Skeletons */}
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="w-full rounded-md bg-white p-4 animate-pulse">
+                <div className="flex items-center justify-between border-b pb-4">
+                  <div>
+                    <div className="h-4 bg-gray-200 rounded w-24 mb-2"></div>
+                    <div className="h-3 bg-gray-200 rounded w-32"></div>
+                  </div>
+                  <div className="h-5 bg-gray-200 rounded-full w-16"></div>
+                </div>
+                <div className="flex w-full items-center justify-between pt-4">
+                  <div>
+                    <div className="h-3 bg-gray-200 rounded w-16 mb-1"></div>
+                    <div className="h-4 bg-gray-200 rounded w-20"></div>
+                  </div>
+                  <div>
+                    <div className="h-3 bg-gray-200 rounded w-16 mb-1"></div>
+                    <div className="h-4 bg-gray-200 rounded w-12"></div>
+                  </div>
+                  <div className="flex justify-end gap-2">
+                    <div className="h-9 w-9 bg-gray-200 rounded-md"></div>
+                    <div className="h-9 w-9 bg-gray-200 rounded-md"></div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <table className="hidden min-w-full text-gray-900 md:table">
+            <thead className="rounded-lg text-left text-sm font-normal">
+              <tr>
+                <th scope="col" className="px-4 py-5 font-medium sm:pl-6">Customer</th>
+                <th scope="col" className="px-3 py-5 font-medium">Email</th>
+                <th scope="col" className="px-3 py-5 font-medium">Company</th>
+                <th scope="col" className="px-3 py-5 font-medium">Total Spent</th>
+                <th scope="col" className="px-3 py-5 font-medium">Invoices</th>
+                <th scope="col" className="px-3 py-5 font-medium">Status</th>
+                <th scope="col" className="relative py-3 pl-6 pr-3"><span className="sr-only">Actions</span></th>
+              </tr>
+            </thead>
+            <tbody className="bg-white">
+              {[...Array(6)].map((_, i) => (
+                <tr key={i} className="w-full border-b py-3 text-sm last-of-type:border-none animate-pulse">
+                  <td className="whitespace-nowrap py-3 pl-6 pr-3">
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-full bg-gray-200"></div>
+                      <div className="h-4 bg-gray-200 rounded w-24"></div>
+                    </div>
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-3">
+                    <div className="h-4 bg-gray-200 rounded w-32"></div>
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-3">
+                    <div className="h-4 bg-gray-200 rounded w-24"></div>
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-3">
+                    <div className="h-4 bg-gray-200 rounded w-16"></div>
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-3">
+                    <div className="h-4 bg-gray-200 rounded w-8"></div>
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-3">
+                    <div className="h-5 bg-gray-200 rounded-full w-16"></div>
+                  </td>
+                  <td className="whitespace-nowrap py-3 pl-6 pr-3">
+                    <div className="flex justify-end gap-3">
+                      <div className="h-9 w-9 bg-gray-200 rounded-md"></div>
+                      <div className="h-9 w-9 bg-gray-200 rounded-md"></div>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export default function CustomersPage() {
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -210,139 +293,46 @@ export default function CustomersPage() {
         </div>
       </div>
 
-      {/* Customers Table */}
-      <div className="mt-6 flow-root">
-        <div className="inline-block min-w-full align-middle">
-          <div className="rounded-lg bg-gray-50 p-2 md:pt-0">
-            <div className="md:hidden">
-              {/* Mobile View */}
-              {loading ? (
-                <div className="text-center py-8 text-gray-500">Loading customers...</div>
-              ) : currentItems.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">
-                  {searchTerm ? 'No customers match your search' : 'No customers found'}
-                </div>
-              ) : (
-                currentItems.map((customer) => (
-                  <div key={customer.id} className="mb-2 w-full rounded-md bg-white p-4">
-                    <div className="flex items-center justify-between border-b pb-4">
-                      <div>
-                        <Link 
-                          href={`/dashboard/customers/${customer.id}`}
-                          className="text-sm font-medium text-gray-900 hover:text-blue-600"
-                        >
-                          {customer.name}
-                        </Link>
-                        <p className="text-sm text-gray-500">{customer.email}</p>
-                      </div>
-                      <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusBadge(customer.status)}`}>
-                        {customer.status.charAt(0).toUpperCase() + customer.status.slice(1)}
-                      </span>
-                    </div>
-                    <div className="flex w-full items-center justify-between pt-4">
-                      <div>
-                        <p className="text-sm text-gray-500">Company</p>
-                        <p className="text-sm font-medium">{customer.company}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-500">Total Spent</p>
-                        <p className="text-sm font-medium">${customer.totalSpent.toFixed(2)}</p>
-                      </div>
-                      <div className="flex justify-end gap-2">
-                        <button
-                          onClick={() => openModal(customer)}
-                          className="rounded-md border p-2 hover:bg-gray-100"
-                        >
-                          <PencilIcon className="w-5 text-gray-500" />
-                        </button>
-                        <button
-                          onClick={() => setDeleteConfirm(customer.id)}
-                          className="rounded-md border p-2 hover:bg-gray-100"
-                        >
-                          <TrashIcon className="w-5 text-red-500" />
-                        </button>
-                      </div>
-                    </div>
+      {/* Customers Table / Skeleton */}
+      {loading ? (
+        <CustomerTableSkeleton />
+      ) : (
+        <div className="mt-6 flow-root">
+          <div className="inline-block min-w-full align-middle">
+            <div className="rounded-lg bg-gray-50 p-2 md:pt-0">
+              <div className="md:hidden">
+                {/* Mobile View */}
+                {currentItems.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">
+                    {searchTerm ? 'No customers match your search' : 'No customers found'}
                   </div>
-                ))
-              )}
-            </div>
-
-            {/* Desktop View */}
-            <table className="hidden min-w-full text-gray-900 md:table">
-              <thead className="rounded-lg text-left text-sm font-normal">
-                <tr>
-                  <th scope="col" className="px-4 py-5 font-medium sm:pl-6">
-                    Customer
-                  </th>
-                  <th scope="col" className="px-3 py-5 font-medium">
-                    Email
-                  </th>
-                  <th scope="col" className="px-3 py-5 font-medium">
-                    Company
-                  </th>
-                  <th scope="col" className="px-3 py-5 font-medium">
-                    Total Spent
-                  </th>
-                  <th scope="col" className="px-3 py-5 font-medium">
-                    Invoices
-                  </th>
-                  <th scope="col" className="px-3 py-5 font-medium">
-                    Status
-                  </th>
-                  <th scope="col" className="relative py-3 pl-6 pr-3">
-                    <span className="sr-only">Actions</span>
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white">
-                {loading ? (
-                  <tr>
-                    <td colSpan={7} className="px-4 py-8 text-center text-gray-500">
-                      Loading customers...
-                    </td>
-                  </tr>
-                ) : currentItems.length === 0 ? (
-                  <tr>
-                    <td colSpan={7} className="px-4 py-8 text-center text-gray-500">
-                      {searchTerm ? 'No customers match your search' : 'No customers found'}
-                    </td>
-                  </tr>
                 ) : (
                   currentItems.map((customer) => (
-                    <tr key={customer.id} className="w-full border-b py-3 text-sm last-of-type:border-none [&:first-child>td:first-child]:rounded-tl-lg [&:first-child>td:last-child]:rounded-tr-lg [&:last-child>td:first-child]:rounded-bl-lg [&:last-child>td:last-child]:rounded-br-lg">
-                      <td className="whitespace-nowrap py-3 pl-6 pr-3">
-                        <div className="flex items-center gap-3">
-                          <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-semibold">
-                            {customer.name.charAt(0).toUpperCase()}
-                          </div>
+                    <div key={customer.id} className="mb-2 w-full rounded-md bg-white p-4">
+                      <div className="flex items-center justify-between border-b pb-4">
+                        <div>
                           <Link 
                             href={`/dashboard/customers/${customer.id}`}
-                            className="font-medium text-gray-900 hover:text-blue-600"
+                            className="text-sm font-medium text-gray-900 hover:text-blue-600"
                           >
                             {customer.name}
                           </Link>
+                          <p className="text-sm text-gray-500">{customer.email}</p>
                         </div>
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-3">
-                        {customer.email}
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-3">
-                        {customer.company}
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-3">
-                        ${customer.totalSpent.toFixed(2)}
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-3">
-                        {customer.invoices}
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-3">
                         <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusBadge(customer.status)}`}>
                           {customer.status.charAt(0).toUpperCase() + customer.status.slice(1)}
                         </span>
-                      </td>
-                      <td className="whitespace-nowrap py-3 pl-6 pr-3">
-                        <div className="flex justify-end gap-3">
+                      </div>
+                      <div className="flex w-full items-center justify-between pt-4">
+                        <div>
+                          <p className="text-sm text-gray-500">Company</p>
+                          <p className="text-sm font-medium">{customer.company}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-500">Total Spent</p>
+                          <p className="text-sm font-medium">${customer.totalSpent.toFixed(2)}</p>
+                        </div>
+                        <div className="flex justify-end gap-2">
                           <button
                             onClick={() => openModal(customer)}
                             className="rounded-md border p-2 hover:bg-gray-100"
@@ -356,25 +346,104 @@ export default function CustomersPage() {
                             <TrashIcon className="w-5 text-red-500" />
                           </button>
                         </div>
-                      </td>
-                    </tr>
+                      </div>
+                    </div>
                   ))
                 )}
-              </tbody>
-            </table>
+              </div>
 
-            {/* Pagination */}
-            {!loading && filteredCustomers.length > 0 && (
-              <div className="mt-5 flex w-full justify-center">
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => handlePageChange(currentPage - 1)}
-                    disabled={currentPage === 1}
-                    className="flex h-10 w-10 items-center justify-center rounded-md border border-gray-200 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <ChevronLeftIcon className="h-5 w-5" />
-                  </button>
-                  
+              {/* Desktop View */}
+              <table className="hidden min-w-full text-gray-900 md:table">
+                <thead className="rounded-lg text-left text-sm font-normal">
+                  <tr>
+                    <th scope="col" className="px-4 py-5 font-medium sm:pl-6">
+                      Customer
+                    </th>
+                    <th scope="col" className="px-3 py-5 font-medium">
+                      Email
+                    </th>
+                    <th scope="col" className="px-3 py-5 font-medium">
+                      Company
+                    </th>
+                    <th scope="col" className="px-3 py-5 font-medium">
+                      Total Spent
+                    </th>
+                    <th scope="col" className="px-3 py-5 font-medium">
+                      Invoices
+                    </th>
+                    <th scope="col" className="px-3 py-5 font-medium">
+                      Status
+                    </th>
+                    <th scope="col" className="relative py-3 pl-6 pr-3">
+                      <span className="sr-only">Actions</span>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white">
+                  {currentItems.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="px-4 py-8 text-center text-gray-500">
+                        {searchTerm ? 'No customers match your search' : 'No customers found'}
+                      </td>
+                    </tr>
+                  ) : (
+                    currentItems.map((customer) => (
+                      <tr key={customer.id} className="w-full border-b py-3 text-sm last-of-type:border-none [&:first-child>td:first-child]:rounded-tl-lg [&:first-child>td:last-child]:rounded-tr-lg [&:last-child>td:first-child]:rounded-bl-lg [&:last-child>td:last-child]:rounded-br-lg">
+                        <td className="whitespace-nowrap py-3 pl-6 pr-3">
+                          <div className="flex items-center gap-3">
+                            <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-semibold">
+                              {customer.name.charAt(0).toUpperCase()}
+                            </div>
+                            <Link 
+                              href={`/dashboard/customers/${customer.id}`}
+                              className="font-medium text-gray-900 hover:text-blue-600"
+                            >
+                              {customer.name}
+                            </Link>
+                          </div>
+                        </td>
+                        <td className="whitespace-nowrap px-3 py-3">
+                          {customer.email}
+                        </td>
+                        <td className="whitespace-nowrap px-3 py-3">
+                          {customer.company}
+                        </td>
+                        <td className="whitespace-nowrap px-3 py-3">
+                          ${customer.totalSpent.toFixed(2)}
+                        </td>
+                        <td className="whitespace-nowrap px-3 py-3">
+                          {customer.invoices}
+                        </td>
+                        <td className="whitespace-nowrap px-3 py-3">
+                          <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusBadge(customer.status)}`}>
+                            {customer.status.charAt(0).toUpperCase() + customer.status.slice(1)}
+                          </span>
+                        </td>
+                        <td className="whitespace-nowrap py-3 pl-6 pr-3">
+                          <div className="flex justify-end gap-3">
+                            <button
+                              onClick={() => openModal(customer)}
+                              className="rounded-md border p-2 hover:bg-gray-100"
+                            >
+                              <PencilIcon className="w-5 text-gray-500" />
+                            </button>
+                            <button
+                              onClick={() => setDeleteConfirm(customer.id)}
+                              className="rounded-md border p-2 hover:bg-gray-100"
+                            >
+                              <TrashIcon className="w-5 text-red-500" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+
+              {/* Pagination (No Arrows) */}
+              {!loading && filteredCustomers.length > 0 && (
+                <div className="mt-5 flex w-full justify-center">
                   <div className="flex items-center gap-1">
                     {[...Array(totalPages)].map((_, index) => {
                       const pageNumber = index + 1;
@@ -400,25 +469,17 @@ export default function CustomersPage() {
                         (pageNumber === 2 && currentPage > 3) ||
                         (pageNumber === totalPages - 1 && currentPage < totalPages - 2)
                       ) {
-                        return <span key={pageNumber} className="px-1">...</span>;
+                        return <span key={pageNumber} className="px-1 text-gray-500">...</span>;
                       }
                       return null;
                     })}
                   </div>
-
-                  <button
-                    onClick={() => handlePageChange(currentPage + 1)}
-                    disabled={currentPage === totalPages}
-                    className="flex h-10 w-10 items-center justify-center rounded-md border border-gray-200 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <ChevronRightIcon className="h-5 w-5" />
-                  </button>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Delete Confirmation Modal */}
       {deleteConfirm && (
