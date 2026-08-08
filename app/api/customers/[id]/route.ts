@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-// GET customer by ID
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -30,7 +30,7 @@ export async function GET(
   }
 }
 
-// PUT update customer
+
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -54,7 +54,7 @@ export async function PUT(
   }
 }
 
-// DELETE customer
+
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }

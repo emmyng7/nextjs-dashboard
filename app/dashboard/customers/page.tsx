@@ -25,7 +25,7 @@ interface Customer {
   createdAt: string;
 }
 
-// --- Skeleton Loading Component ---
+
 const CustomerTableSkeleton = () => {
   return (
     <div className="mt-6 flow-root">
@@ -126,7 +126,7 @@ export default function CustomersPage() {
     status: "active" as 'active' | 'inactive',
   });
 
-  // Fetch customers on mount
+  
   useEffect(() => {
     loadCustomers();
   }, []);
@@ -144,14 +144,14 @@ export default function CustomersPage() {
     }
   };
 
-  // Filter customers based on search
+  
   const filteredCustomers = customers.filter((customer) =>
     customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     customer.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
     customer.company.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Open modal for adding/editing
+  
   const openModal = (customer: Customer | null = null) => {
     if (customer) {
       setEditingCustomer(customer);
@@ -187,13 +187,13 @@ export default function CustomersPage() {
     });
   };
 
-  // Handle form input changes
+  
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Submit form (add or update)
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -217,13 +217,13 @@ export default function CustomersPage() {
     }
   };
 
-  // Delete customer INSTANTLY - NO LOADING
+  
   const handleDelete = async (customerId: number) => {
     try {
-      // 1. Instantly remove it from the local UI state (No loading/pulsing)
+      
       setCustomers((prevCustomers) => prevCustomers.filter((c) => c.id !== customerId));
 
-      // 2. Send the delete request to the server in the background
+      
       await deleteCustomer(customerId);
       
       toast.success('Customer deleted successfully');
@@ -231,12 +231,12 @@ export default function CustomersPage() {
       console.error("Failed to delete customer:", error);
       toast.error('Failed to delete customer');
       
-      // If the server delete fails, you might want to re-fetch to restore the user in the list
+      
       loadCustomers(); 
     }
   };
 
-  // Get status badge color
+  
   const getStatusBadge = (status: string) => {
     const colors = {
       active: "bg-green-100 text-green-800",
@@ -258,7 +258,7 @@ export default function CustomersPage() {
         </button>
       </div>
 
-      {/* Search */}
+      
       <div className="mt-4 flex items-center justify-between gap-2 md:mt-8">
         <div className="relative flex flex-1 flex-shrink-0">
           <label htmlFor="search" className="sr-only">
@@ -276,7 +276,7 @@ export default function CustomersPage() {
         </div>
       </div>
 
-      {/* Customers Table / Skeleton */}
+      
       {loading ? (
         <CustomerTableSkeleton />
       ) : (
@@ -284,7 +284,7 @@ export default function CustomersPage() {
           <div className="inline-block min-w-full align-middle">
             <div className="rounded-lg bg-gray-50 p-2 md:pt-0">
               <div className="md:hidden">
-                {/* Mobile View */}
+                
                 {filteredCustomers.length === 0 ? (
                   <div className="text-center py-8 text-gray-500">
                     {searchTerm ? 'No customers match your search' : 'No customers found'}
@@ -335,7 +335,7 @@ export default function CustomersPage() {
                 )}
               </div>
 
-              {/* Desktop View */}
+              
               <table className="hidden min-w-full text-gray-900 md:table">
                 <thead className="rounded-lg text-left text-sm font-normal">
                   <tr>
@@ -428,7 +428,7 @@ export default function CustomersPage() {
         </div>
       )}
       
-      {/* Add/Edit Customer Modal */}
+    
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="bg-white rounded-lg max-w-md w-full shadow-xl max-h-[90vh] overflow-y-auto">
