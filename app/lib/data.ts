@@ -58,17 +58,17 @@ export async function fetchLatestInvoices() {
 
 export async function fetchCardData() {
   try {
-    // Hardcoded data for the top 4 cards
-    const numberOfInvoices = 15; 
-    const numberOfCustomers = 10; 
-    const totalPaidInvoices = formatCurrency(150000);
-    const totalPendingInvoices = formatCurrency(50000);
+  
+    const totalPaidInvoices = 150000;
+    const totalPendingInvoices = 50000;
+    const numberOfInvoices = 6;
+    const numberOfCustomers = 3;
 
     return {
       numberOfCustomers,
       numberOfInvoices,
-      totalPaidInvoices,
-      totalPendingInvoices,
+      totalPaidInvoices, 
+      totalPendingInvoices, 
     };
   } catch (error) {
     console.error('Database Error:', error);

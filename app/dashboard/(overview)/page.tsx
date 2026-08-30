@@ -13,6 +13,8 @@ import { fetchLatestInvoices, fetchCardData } from '@/app/lib/data';
 
 export default async function Page() {
     const latestInvoices = await fetchLatestInvoices();
+    
+    // Fetch the raw numbers
     const {
       totalPaidInvoices,
       totalPendingInvoices,
@@ -26,8 +28,8 @@ export default async function Page() {
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         <Suspense fallback={<CardsSkeleton />}>
           <CardWrapper 
-            totalPaidInvoices={totalPaidInvoices}
-            totalPendingInvoices={totalPendingInvoices}
+            totalPaidInvoices={totalPaidInvoices} // Passes raw number
+            totalPendingInvoices={totalPendingInvoices} // Passes raw number
           />
           <CustomerCount />
         </Suspense>

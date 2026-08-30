@@ -5,6 +5,7 @@ import {
   ChartBarIcon,
 } from '@heroicons/react/24/outline';
 import { lusitana } from '@/app/ui/fonts';
+import { formatCurrency } from '@/app/lib/utils';
 
 const iconMap = {
   collected: BanknotesIcon,
@@ -22,8 +23,8 @@ export default async function CardWrapper({
 }) {
   return (
     <>
-      <Card title="Collected" value={totalPaidInvoices} type="collected" />
-      <Card title="Pending" value={totalPendingInvoices} type="pending" />
+      <Card title="Collected" value={formatCurrency(totalPaidInvoices)} type="collected" />
+      <Card title="Pending" value={formatCurrency(totalPendingInvoices)} type="pending" />
     </>
   );
 }
