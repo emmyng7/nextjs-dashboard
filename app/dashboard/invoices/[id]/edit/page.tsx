@@ -7,6 +7,7 @@ import Form from '@/app/ui/invoices/edit-form';
 import Breadcrumbs from '@/app/ui/invoices/breadcrumbs';
 import { fetchInvoiceById, Invoice } from '@/app/lib/services/invoiceService';
 import { fetchCustomers } from '@/app/lib/services/customerService';
+import { Customer } from '@/app/lib/services/customerService'; // Import Customer type
 
 export default function Page() {
   const params = useParams();
@@ -14,7 +15,7 @@ export default function Page() {
   const invoiceId = Number(params.id);
 
   const [invoice, setInvoice] = useState<Invoice | null>(null);
-  const [customers, setCustomers] = useState([]);
+  const [customers, setCustomers] = useState<Customer[]>([]); // Changed to Customer[]
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
