@@ -1,17 +1,25 @@
 'use client'
 
-
 import { createInvoice, State } from '@/app/lib/actions';
 import { useActionState } from 'react';
-import { CustomerField } from '@/app/lib/definitions';
 import Link from 'next/link';
 import {
   CheckIcon,
   ClockIcon,
-  CurrencyDollarIcon,
+  BanknotesIcon,
   UserCircleIcon,
 } from '@heroicons/react/24/outline';
 import { Button } from '@/app/ui/button';
+import Image from 'next/image'; // ADD THIS IMPORT
+
+// Define the interface to match LocalStorage customers (including photo)
+interface CustomerField {
+  id: number;
+  name: string;
+  email?: string;
+  status?: string;
+  photo?: string; // ADD THIS
+}
 
 export default function Form({ customers }: { customers: CustomerField[] }){
   const initialState: State = { message: null, errors: {} };
@@ -39,11 +47,17 @@ export default function Form({ customers }: { customers: CustomerField[] }){
               <option value="" disabled>
                 Select a customer
               </option>
-              {customers.map((customer) => (
-                <option key={customer.id} value={customer.id}>
-                  {customer.name}
+              {customers.length === 0 ? (
+                <option value="" disabled>
+                  No customers found - Please add one first
                 </option>
-              ))}
+              ) : (
+                customers.map((customer) => (
+                  <option key={customer.id} value={customer.id}>
+                    {customer.name}
+                  </option>
+                ))
+              )}
             </select>
             <UserCircleIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500" />
           </div>
@@ -69,11 +83,13 @@ export default function Form({ customers }: { customers: CustomerField[] }){
                 name="amount"
                 type="number"
                 step="0.01"
-                placeholder="Enter USD amount"
+                placeholder="Enter amount in Naira (₦)"
                 className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
-                
               />
-              <CurrencyDollarIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
+              <BanknotesIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
+              <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm font-medium text-gray-500">
+                ₦
+              </span>
             </div>
           </div>
         </div>

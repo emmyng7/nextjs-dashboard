@@ -1,15 +1,16 @@
 import { Revenue } from './definitions';
 
 export const formatCurrency = (amount: number) => {
-  return (amount / 100).toLocaleString('en-US', {
+  // Removed / 100 so it shows the exact amount in Naira
+  return (amount).toLocaleString('en-NG', {
     style: 'currency',
-    currency: 'USD',
+    currency: 'NGN',
   });
 };
 
 export const formatDateToLocal = (
   dateStr: string,
-  locale: string = 'en-US',
+  locale: string = 'en-US', // Changed back to en-US for standard date display (e.g., "Jan 1, 2025")
 ) => {
   const date = new Date(dateStr);
   const options: Intl.DateTimeFormatOptions = {
@@ -29,7 +30,8 @@ export const generateYAxis = (revenue: Revenue[]) => {
   const topLabel = Math.ceil(highestRecord / 1000) * 1000;
 
   for (let i = topLabel; i >= 0; i -= 1000) {
-    yAxisLabels.push(`$${i / 1000}K`);
+    // CHANGED: Replaced $ with ₦
+    yAxisLabels.push(`₦${i / 1000}K`);
   }
 
   return { yAxisLabels, topLabel };

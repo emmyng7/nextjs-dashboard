@@ -1,6 +1,11 @@
+'use client';
+
 import { PencilIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
-import { deleteInvoice } from '@/app/lib/actions';
+import { useRouter } from 'next/navigation';
+import { deleteInvoice } from '@/app/lib/services/invoiceService';
+import toast from 'react-hot-toast';
+
 export function CreateInvoice() {
   return (
     <Link
@@ -14,7 +19,6 @@ export function CreateInvoice() {
 }
 
 export function UpdateInvoice({ id }: { id: string }) {
-    const deleteInvoiceWithId = deleteInvoice.bind(null, id);
   return (
     <Link
       href={`/dashboard/invoices/${id}/edit`}
@@ -26,13 +30,28 @@ export function UpdateInvoice({ id }: { id: string }) {
 }
 
 export function DeleteInvoice({ id }: { id: string }) {
-    const deleteInvoiceWithId = deleteInvoice.bind(null, id);
+  const router = useRouter();
+
+  const handleDelete = async () => {
+    try {
+      // 1. Call the service to delete from LocalStorage
+      await deleteInvoice(Number(id));
+      
+      // 2. Show success toast
+      toast.success('Invoice deleted successfully');
+      
+      // 3. Refresh the page so the table updates
+      router.refresh();
+    } catch (error) {
+      console.error(error);
+      toast.error('Failed to delete invoice');
+    }
+  };
+
   return (
-    <form action={deleteInvoiceWithId}>
-      <button type="submit" className="rounded-md border p-2 hover:bg-gray-100">
-        <span className="sr-only">Delete</span>
-        <TrashIcon className="w-5" />
-      </button>
-    </form>
+    <button onClick={handleDelete} className="rounded-md border p-2 hover:bg-gray-100">
+      <span className="sr-only">Delete</span>
+      <TrashIcon className="w-5" />
+    </button>
   );
 }

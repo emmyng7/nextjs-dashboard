@@ -1,26 +1,58 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
 import Form from '@/app/ui/invoices/edit-form';
 import Breadcrumbs from '@/app/ui/invoices/breadcrumbs';
-import { fetchInvoiceById, fetchCustomers } from '@/app/lib/data';
-import { notFound } from 'next/navigation';
+import { fetchInvoiceById, Invoice } from '@/app/lib/services/invoiceService';
+import { fetchCustomers } from '@/app/lib/services/customerService';
 
-export default async function Page({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const { id } = await params;
+export default function Page() {
+  const params = useParams();
+  const router = useRouter();
+  const invoiceId = Number(params.id);
 
-  if (!id) {
-    notFound();
+  const [invoice, setInvoice] = useState<Invoice | null>(null);
+  const [customers, setCustomers] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const [invoiceData, customerData] = await Promise.all([
+          fetchInvoiceById(invoiceId),
+          fetchCustomers()
+        ]);
+        setInvoice(invoiceData);
+        
+        // Only show active customers
+        const activeCustomers = customerData.filter((c: any) => c.status === 'active');
+        setCustomers(activeCustomers);
+      } catch (error) {
+        console.error("Failed to load invoice:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadData();
+  }, [invoiceId]);
+
+  if (loading) {
+    return <div className="text-center py-8 text-gray-500">Loading invoice...</div>;
   }
 
-  const [invoice, customers] = await Promise.all([
-    fetchInvoiceById(id),
-    fetchCustomers(),
-  ]);
-
   if (!invoice) {
-    notFound();
+    return (
+      <main>
+        <div className="text-center py-12">
+          <h2 className="text-2xl font-semibold text-gray-900">Invoice Not Found</h2>
+          <Link href="/dashboard/invoices" className="mt-4 inline-block px-4 py-2 bg-blue-600 text-white rounded-lg">
+            Go Back
+          </Link>
+        </div>
+      </main>
+    );
   }
 
   return (
@@ -30,7 +62,7 @@ export default async function Page({
           { label: 'Invoices', href: '/dashboard/invoices' },
           {
             label: 'Edit Invoice',
-            href: `/dashboard/invoices/${id}/edit`,
+            href: `/dashboard/invoices/${invoiceId}/edit`,
             active: true,
           },
         ]}

@@ -1,17 +1,40 @@
-import Image from 'next/image';
-import { UpdateInvoice, DeleteInvoice } from '@/app/ui/invoices/buttons';
+"use client";
+
+import { useState, useEffect } from 'react';
+import { UpdateInvoice } from '@/app/ui/invoices/buttons';
+import DeleteButton from '@/app/ui/invoices/delete-button';
 import InvoiceStatus from '@/app/ui/invoices/status';
 import { formatDateToLocal, formatCurrency } from '@/app/lib/utils';
-import { fetchFilteredInvoices } from '@/app/lib/data';
+import { fetchInvoices, Invoice } from '@/app/lib/services/invoiceService';
 
-export default async function InvoicesTable({
-  query,
-  currentPage,
-}: {
-  query: string;
-  currentPage: number;
-}) {
-  const invoices = await fetchFilteredInvoices(query, currentPage);
+export default function InvoicesTable() {
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const loadInvoices = async () => {
+    try {
+      const data = await fetchInvoices();
+      // Ensure every invoice has a name, email, and image
+      const safeData = data.map((inv) => ({
+        ...inv,
+        name: inv.name || 'Unknown Customer',
+        email: inv.email || 'no-email@example.com',
+      }));
+      setInvoices(safeData);
+    } catch (error) {
+      console.error("Failed to load invoices:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadInvoices();
+  }, []);
+
+  if (loading) {
+    return <div className="text-center py-8 text-gray-500">Loading invoices...</div>;
+  }
 
   return (
     <div className="mt-6 flow-root">
@@ -26,14 +49,10 @@ export default async function InvoicesTable({
                 <div className="flex items-center justify-between border-b pb-4">
                   <div>
                     <div className="mb-2 flex items-center">
-                      <Image
-                        src={invoice.image_url}
-                        className="mr-2 rounded-full"
-                        width={28}
-                        height={28}
-                        alt={`${invoice.name}'s profile picture`}
-                      />
-                      <p>{invoice.name}</p>
+                      <div className="h-7 w-7 rounded-full bg-gray-200 flex items-center justify-center text-sm font-semibold">
+                        {invoice.name?.charAt(0)?.toUpperCase() || '?'}
+                      </div>
+                      <p className="ml-2">{invoice.name}</p>
                     </div>
                     <p className="text-sm text-gray-500">{invoice.email}</p>
                   </div>
@@ -47,8 +66,8 @@ export default async function InvoicesTable({
                     <p>{formatDateToLocal(invoice.date)}</p>
                   </div>
                   <div className="flex justify-end gap-2">
-                    <UpdateInvoice id={invoice.id} />
-                    <DeleteInvoice id={invoice.id} />
+                    <UpdateInvoice id={String(invoice.id)} />
+                    <DeleteButton id={String(invoice.id)} onDeleted={loadInvoices} />
                   </div>
                 </div>
               </div>
@@ -57,24 +76,12 @@ export default async function InvoicesTable({
           <table className="hidden min-w-full text-gray-900 md:table">
             <thead className="rounded-lg text-left text-sm font-normal">
               <tr>
-                <th scope="col" className="px-4 py-5 font-medium sm:pl-6">
-                  Customer
-                </th>
-                <th scope="col" className="px-3 py-5 font-medium">
-                  Email
-                </th>
-                <th scope="col" className="px-3 py-5 font-medium">
-                  Amount
-                </th>
-                <th scope="col" className="px-3 py-5 font-medium">
-                  Date
-                </th>
-                <th scope="col" className="px-3 py-5 font-medium">
-                  Status
-                </th>
-                <th scope="col" className="relative py-3 pl-6 pr-3">
-                  <span className="sr-only">Edit</span>
-                </th>
+                <th scope="col" className="px-4 py-5 font-medium sm:pl-6">Customer</th>
+                <th scope="col" className="px-3 py-5 font-medium">Email</th>
+                <th scope="col" className="px-3 py-5 font-medium">Amount</th>
+                <th scope="col" className="px-3 py-5 font-medium">Date</th>
+                <th scope="col" className="px-3 py-5 font-medium">Status</th>
+                <th scope="col" className="relative py-3 pl-6 pr-3"><span className="sr-only">Edit</span></th>
               </tr>
             </thead>
             <tbody className="bg-white">
@@ -85,32 +92,20 @@ export default async function InvoicesTable({
                 >
                   <td className="whitespace-nowrap py-3 pl-6 pr-3">
                     <div className="flex items-center gap-3">
-                      <Image
-                        src={invoice.image_url}
-                        className="rounded-full"
-                        width={28}
-                        height={28}
-                        alt={`${invoice.name}'s profile picture`}
-                      />
+                      <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-semibold">
+                        {invoice.name?.charAt(0)?.toUpperCase() || '?'}
+                      </div>
                       <p>{invoice.name}</p>
                     </div>
                   </td>
-                  <td className="whitespace-nowrap px-3 py-3">
-                    {invoice.email}
-                  </td>
-                  <td className="whitespace-nowrap px-3 py-3">
-                    {formatCurrency(invoice.amount)}
-                  </td>
-                  <td className="whitespace-nowrap px-3 py-3">
-                    {formatDateToLocal(invoice.date)}
-                  </td>
-                  <td className="whitespace-nowrap px-3 py-3">
-                    <InvoiceStatus status={invoice.status} />
-                  </td>
+                  <td className="whitespace-nowrap px-3 py-3">{invoice.email}</td>
+                  <td className="whitespace-nowrap px-3 py-3">{formatCurrency(invoice.amount)}</td>
+                  <td className="whitespace-nowrap px-3 py-3">{formatDateToLocal(invoice.date)}</td>
+                  <td className="whitespace-nowrap px-3 py-3"><InvoiceStatus status={invoice.status} /></td>
                   <td className="whitespace-nowrap py-3 pl-6 pr-3">
                     <div className="flex justify-end gap-3">
-                      <UpdateInvoice id={invoice.id} />
-                      <DeleteInvoice id={invoice.id} />
+                      <UpdateInvoice id={String(invoice.id)} />
+                      <DeleteButton id={String(invoice.id)} onDeleted={loadInvoices} />
                     </div>
                   </td>
                 </tr>

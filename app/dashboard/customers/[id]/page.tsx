@@ -10,11 +10,11 @@ import {
   PhoneIcon,
   BuildingOfficeIcon,
   CalendarIcon,
-  CurrencyDollarIcon,
+  BanknotesIcon,
   DocumentTextIcon,
   ChartBarIcon
 } from "@heroicons/react/24/outline";
-import { fetchCustomerById, fetchCustomerInvoices } from "@/app/lib/services/customerService";
+import { fetchCustomers } from "@/app/lib/services/customerService";
 import toast from 'react-hot-toast';
 
 interface Customer {
@@ -56,12 +56,16 @@ export default function CustomerDetailsPage() {
   const loadCustomerData = async () => {
     setLoading(true);
     try {
-      const [customerData, invoicesData] = await Promise.all([
-        fetchCustomerById(Number(customerId)),
-        fetchCustomerInvoices(Number(customerId))
-      ]);
-      setCustomer(customerData as Customer);
-      setInvoices(invoicesData as Invoice[]);
+      // Fetch all customers and find the one matching the ID
+      const allCustomers = await fetchCustomers();
+      const foundCustomer = allCustomers.find((c) => c.id === Number(customerId));
+      
+      setCustomer(foundCustomer as Customer);
+      
+      // For now, we don't have an invoice service, so we show an empty array
+      // If you want to load invoices, you can pass the customer ID to a fetchInvoices function later.
+      setInvoices([]); 
+      
     } catch (error) {
       console.error("Failed to load customer data:", error);
       toast.error('Failed to load customer details');
@@ -156,10 +160,10 @@ export default function CustomerDetailsPage() {
         {/* Quick Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6 pt-6 border-t border-gray-200">
           <div className="flex items-center gap-3">
-            <CurrencyDollarIcon className="h-8 w-8 text-indigo-600" />
+            <BanknotesIcon className="h-8 w-8 text-indigo-600" />
             <div>
               <p className="text-sm text-gray-500">Total Spent</p>
-              <p className="text-xl font-semibold text-gray-900">${customer.totalSpent.toFixed(2)}</p>
+              <p className="text-xl font-semibold text-gray-900">₦{customer.totalSpent.toFixed(2)}</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -174,7 +178,7 @@ export default function CustomerDetailsPage() {
             <div>
               <p className="text-sm text-gray-500">Average Invoice</p>
               <p className="text-xl font-semibold text-gray-900">
-                ${customer.invoices > 0 ? (customer.totalSpent / customer.invoices).toFixed(2) : '0.00'}
+                ₦{customer.invoices > 0 ? (customer.totalSpent / customer.invoices).toFixed(2) : '0.00'}
               </p>
             </div>
           </div>
@@ -287,7 +291,7 @@ export default function CustomerDetailsPage() {
                             {new Date(invoice.date).toLocaleDateString()}
                           </td>
                           <td className="px-4 py-3 text-sm font-medium text-gray-900 text-right">
-                            ${invoice.amount.toFixed(2)}
+                            ₦{invoice.amount.toFixed(2)}
                           </td>
                           <td className="px-4 py-3">
                             <span className={`px-2 py-1 text-xs font-medium rounded-full ${getInvoiceStatusBadge(invoice.status)}`}>

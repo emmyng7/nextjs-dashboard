@@ -1,151 +1,178 @@
-'use server';
-
-import { z } from 'zod';
-import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
-import postgres from 'postgres';
-import { signIn } from '@/app/auth';
-import { AuthError } from 'next-auth';
-
-const sql = postgres(process.env.POSTGRES_URL!, {
-  ssl: 'require',
-});
+import { createCustomer, updateCustomer, deleteCustomer } from '@/app/lib/services/customerService';
+import { deleteInvoice as deleteInvoiceFromLocal } from '@/app/lib/services/invoiceService';
 
 export type State = {
   errors?: {
     customerId?: string[];
     amount?: string[];
     status?: string[];
+    name?: string[];
+    email?: string[];
+    phone?: string[];
+    company?: string[];
+    address?: string[];
   };
   message?: string | null;
 };
 
-const FormSchema = z.object({
-  id: z.string(),
-  customerId: z.string({
-    invalid_type_error: 'Please select a customer.',
-  }),
-  amount: z.coerce
-    .number()
-    .gt(0, { message: 'Please enter an amount greater than $0.' }),
-  status: z.enum(['pending', 'paid'], {
-    invalid_type_error: 'Please select an invoice status.',
-  }),
-  date: z.string(),
-});
-
-const CreateInvoice = FormSchema.omit({
-  id: true,
-  date: true,
-});
-
-export async function createInvoice(
-  prevState: State,
+// --- AUTHENTICATION (NO postgres - uses LocalStorage for now) ---
+export async function authenticate(
+  prevState: string | undefined,
   formData: FormData,
 ) {
-  const validatedFields = CreateInvoice.safeParse({
-    customerId: formData.get('customerId'),
-    amount: formData.get('amount'),
-    status: formData.get('status'),
-  });
+  const email = formData.get('email') as string;
+  const password = formData.get('password') as string;
 
-  if (!validatedFields.success) {
-    return {
-      errors: validatedFields.error.flatten().fieldErrors,
-      message: 'Missing Fields. Failed to Create Invoice.',
-    };
-  }
-
-  const { customerId, amount, status } = validatedFields.data;
-
-  const amountInCents = amount * 100;
-  const date = new Date().toISOString().split('T')[0];
-
-  try {
-    await sql`
-      INSERT INTO invoices (customer_id, amount, status, date)
-      VALUES (${customerId}, ${amountInCents}, ${status}, ${date})
-    `;
-  } catch (error) {
-    console.error(error);
-
-    return {
-      message: 'Database Error: Failed to Create Invoice.',
-    };
-  }
-
-  revalidatePath('/dashboard/invoices');
-  redirect('/dashboard/invoices');
+  // For a demo: You can manually check if the login is correct.
+  // If you want to use your database, put this logic in a separate Server Component.
+  // For now, we will allow any email and password to log in.
+  return 'Success';
 }
 
+// --- INVOICES ---
+
+// Delete Invoice from LocalStorage
 export async function deleteInvoice(id: string) {
   try {
-    await sql`
-      DELETE FROM invoices
-      WHERE id = ${id}
-    `;
-
-    revalidatePath('/dashboard/invoices');
+    await deleteInvoiceFromLocal(Number(id));
   } catch (error) {
     console.error(error);
     throw new Error('Failed to Delete Invoice');
   }
 }
 
-export async function updateInvoice(
-  id: string,
-  prevState: State,
-  formData: FormData,
-) {
-  const validatedFields = UpdateInvoice.safeParse({
-    customerId: formData.get('customerId'),
-    amount: formData.get('amount'),
-    status: formData.get('status'),
-  });
- 
-  if (!validatedFields.success) {
+// Create Invoice from LocalStorage
+export async function createInvoice(prevState: State, formData: FormData) {
+  const customerId = Number(formData.get('customerId'));
+  const amount = Number(formData.get('amount'));
+  const status = formData.get('status') as 'paid' | 'pending';
+
+  if (!customerId) {
     return {
-      errors: validatedFields.error.flatten().fieldErrors,
+      errors: { customerId: ['Please select a customer.'] },
+      message: 'Missing Fields. Failed to Create Invoice.',
+    };
+  }
+
+  if (!amount || amount <= 0) {
+    return {
+      errors: { amount: ['Please enter an amount greater than 0.'] },
+      message: 'Missing Fields. Failed to Create Invoice.',
+    };
+  }
+
+  try {
+    const { createInvoice: createInvoiceLocal } = await import('@/app/lib/services/invoiceService');
+    await createInvoiceLocal({ customerId, amount, status });
+    return { message: 'Invoice created successfully.' };
+  } catch (error) {
+    console.error(error);
+    return { message: 'Database Error: Failed to Create Invoice.' };
+  }
+}
+
+// Update Invoice from LocalStorage
+export async function updateInvoice(id: string, prevState: State, formData: FormData) {
+  const customerId = Number(formData.get('customerId'));
+  const amount = Number(formData.get('amount'));
+  const status = formData.get('status') as 'paid' | 'pending';
+
+  if (!customerId) {
+    return {
+      errors: { customerId: ['Please select a customer.'] },
       message: 'Missing Fields. Failed to Update Invoice.',
     };
   }
- 
-  const { customerId, amount, status } = validatedFields.data;
-  const amountInCents = amount * 100;
- 
+
+  if (!amount || amount <= 0) {
+    return {
+      errors: { amount: ['Please enter an amount greater than 0.'] },
+      message: 'Missing Fields. Failed to Update Invoice.',
+    };
+  }
+
   try {
-    await sql`
-      UPDATE invoices
-      SET customer_id = ${customerId}, amount = ${amountInCents}, status = ${status}
-      WHERE id = ${id}
-    `;
+    const { updateInvoice: updateInvoiceLocal } = await import('@/app/lib/services/invoiceService');
+    await updateInvoiceLocal(Number(id), { customerId, amount, status });
+    return { message: 'Invoice updated successfully.' };
   } catch (error) {
+    console.error(error);
     return { message: 'Database Error: Failed to Update Invoice.' };
   }
- 
-  revalidatePath('/dashboard/invoices');
-  redirect('/dashboard/invoices');
 }
-export async function authenticate(
-  prevState: string | undefined,
-  formData: FormData,
-) {
-  try {
-    await signIn('credentials', formData);
-  } catch (error) {
-    if (error instanceof AuthError) {
-      switch (error.type) {
-        case 'CredentialsSignin':
-          return 'Invalid credentials.';
-        default:
-          return 'Something went wrong.';
-      }
-    }
 
-    throw error;
+// --- CUSTOMERS ---
+
+// Create Customer
+export async function createCustomerAction(prevState: State, formData: FormData) {
+  const name = formData.get('name') as string;
+  const email = formData.get('email') as string;
+  const phone = formData.get('phone') as string;
+  const company = formData.get('company') as string;
+  const address = formData.get('address') as string;
+  const status = formData.get('status') as 'active' | 'inactive';
+
+  if (!name || !email) {
+    return {
+      errors: { name: ['Name is required.'], email: ['Email is required.'] },
+      message: 'Missing Fields. Failed to Create Customer.',
+    };
+  }
+
+  try {
+    await createCustomer({
+      name,
+      email,
+      phone,
+      company,
+      address,
+      status,
+    } as any);
+    return { message: 'Customer created successfully.' };
+  } catch (error) {
+    console.error(error);
+    return { message: 'Database Error: Failed to Create Customer.' };
   }
 }
-const UpdateInvoice = FormSchema.omit({
-  id: true,
-  date: true,
-});
+
+// Update Customer
+export async function updateCustomerAction(id: number, prevState: State, formData: FormData) {
+  const name = formData.get('name') as string;
+  const email = formData.get('email') as string;
+  const phone = formData.get('phone') as string;
+  const company = formData.get('company') as string;
+  const address = formData.get('address') as string;
+  const status = formData.get('status') as 'active' | 'inactive';
+
+  if (!name || !email) {
+    return {
+      errors: { name: ['Name is required.'], email: ['Email is required.'] },
+      message: 'Missing Fields. Failed to Update Customer.',
+    };
+  }
+
+  try {
+    await updateCustomer(id, {
+      name,
+      email,
+      phone,
+      company,
+      address,
+      status,
+    } as any);
+    return { message: 'Customer updated successfully.' };
+  } catch (error) {
+    console.error(error);
+    return { message: 'Database Error: Failed to Update Customer.' };
+  }
+}
+
+// Delete Customer
+export async function deleteCustomerAction(id: number) {
+  try {
+    await deleteCustomer(id);
+  } catch (error) {
+    console.error(error);
+    throw new Error('Failed to Delete Customer');
+  }
+}
