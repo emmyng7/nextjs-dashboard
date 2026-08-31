@@ -1,6 +1,15 @@
-import { fetchCustomers, Customer } from '@/app/lib/services/customerService';
-import { deleteInvoice as deleteInvoiceFromLocal } from '@/app/lib/services/invoiceService';
-import { createInvoice as createInvoiceLocal, updateInvoice as updateInvoiceLocal } from '@/app/lib/services/invoiceService';
+import { 
+  fetchCustomers, 
+  createCustomer, 
+  updateCustomer, 
+  deleteCustomer, 
+  Customer 
+} from '@/app/lib/services/customerService';
+import { 
+  deleteInvoice as deleteInvoiceFromLocal, 
+  createInvoice as createInvoiceLocal, 
+  updateInvoice as updateInvoiceLocal 
+} from '@/app/lib/services/invoiceService';
 
 export type State = {
   errors?: {
@@ -16,7 +25,7 @@ export type State = {
   message?: string | null;
 };
 
-// --- AUTHENTICATION (Using your database) ---
+// --- AUTHENTICATION ---
 export async function authenticate(
   prevState: string | undefined,
   formData: FormData,
