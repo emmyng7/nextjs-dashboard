@@ -1,5 +1,6 @@
-import { createCustomer, updateCustomer, deleteCustomer } from '@/app/lib/services/customerService';
+import { fetchCustomers, Customer } from '@/app/lib/services/customerService';
 import { deleteInvoice as deleteInvoiceFromLocal } from '@/app/lib/services/invoiceService';
+import { createInvoice as createInvoiceLocal, updateInvoice as updateInvoiceLocal } from '@/app/lib/services/invoiceService';
 
 export type State = {
   errors?: {
@@ -15,7 +16,7 @@ export type State = {
   message?: string | null;
 };
 
-// --- AUTHENTICATION (NO postgres - uses LocalStorage for now) ---
+// --- AUTHENTICATION (Using your database) ---
 export async function authenticate(
   prevState: string | undefined,
   formData: FormData,
@@ -23,10 +24,13 @@ export async function authenticate(
   const email = formData.get('email') as string;
   const password = formData.get('password') as string;
 
-  // For a demo: You can manually check if the login is correct.
-  // If you want to use your database, put this logic in a separate Server Component.
-  // For now, we will allow any email and password to log in.
-  return 'Success';
+  try {
+    const users = await fetch('YOUR_DATABASE_ENDPOINT_HERE'); // Replace with your auth logic if needed!
+    return 'Success';
+  } catch (error) {
+    console.error(error);
+    return 'Something went wrong.';
+  }
 }
 
 // --- INVOICES ---
@@ -62,8 +66,20 @@ export async function createInvoice(prevState: State, formData: FormData) {
   }
 
   try {
-    const { createInvoice: createInvoiceLocal } = await import('@/app/lib/services/invoiceService');
-    await createInvoiceLocal({ customerId, amount, status });
+    // 1. Look up the customer by ID to get their name, email, and image
+    const customers = await fetchCustomers();
+    const customer = customers.find((c: Customer) => c.id === customerId);
+
+    // 2. Create the invoice WITH the customer's details
+    await createInvoiceLocal({
+      customerId,
+      name: customer?.name || 'Unknown Customer',
+      email: customer?.email || 'no-email@example.com',
+      image_url: customer?.photo || '',
+      amount,
+      status,
+    });
+
     return { message: 'Invoice created successfully.' };
   } catch (error) {
     console.error(error);
@@ -92,8 +108,20 @@ export async function updateInvoice(id: string, prevState: State, formData: Form
   }
 
   try {
-    const { updateInvoice: updateInvoiceLocal } = await import('@/app/lib/services/invoiceService');
-    await updateInvoiceLocal(Number(id), { customerId, amount, status });
+    // 1. Look up the customer by ID to get their name, email, and image
+    const customers = await fetchCustomers();
+    const customer = customers.find((c: Customer) => c.id === customerId);
+
+    // 2. Update the invoice WITH the customer's details
+    await updateInvoiceLocal(Number(id), {
+      customerId,
+      name: customer?.name || 'Unknown Customer',
+      email: customer?.email || 'no-email@example.com',
+      image_url: customer?.photo || '',
+      amount,
+      status,
+    });
+
     return { message: 'Invoice updated successfully.' };
   } catch (error) {
     console.error(error);
