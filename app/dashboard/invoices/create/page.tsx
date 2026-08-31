@@ -3,10 +3,10 @@
 import { useState, useEffect } from "react";
 import Form from '@/app/ui/invoices/create-form';
 import Breadcrumbs from '@/app/ui/invoices/breadcrumbs';
-import { fetchCustomers } from '@/app/lib/services/customerService';
+import { fetchCustomers, Customer } from '@/app/lib/services/customerService';
 
 export default function Page() {
-  const [customers, setCustomers] = useState([]);
+  const [customers, setCustomers] = useState<Customer[]>([]);
 
   useEffect(() => {
     const loadCustomers = async () => {
@@ -29,7 +29,7 @@ export default function Page() {
           },
         ]}
       />
-      <Form customers={customers} />
+      <Form customers={customers as any} />
     </main>
   );
 }

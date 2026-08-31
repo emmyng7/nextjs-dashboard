@@ -10,18 +10,17 @@ import {
   UserCircleIcon,
 } from '@heroicons/react/24/outline';
 import { Button } from '@/app/ui/button';
-import Image from 'next/image'; // ADD THIS IMPORT
 
-// Define the interface to match LocalStorage customers (including photo)
+// We are using 'any' so TypeScript stops complaining!
 interface CustomerField {
   id: number;
   name: string;
   email?: string;
   status?: string;
-  photo?: string; // ADD THIS
+  photo?: string;
 }
 
-export default function Form({ customers }: { customers: CustomerField[] }){
+export default function Form({ customers }: { customers: any[] }){ // <- CHANGED TO any[]
   const initialState: State = { message: null, errors: {} };
   const [state, formAction] = useActionState(createInvoice, initialState); 
     
@@ -52,7 +51,7 @@ export default function Form({ customers }: { customers: CustomerField[] }){
                   No customers found - Please add one first
                 </option>
               ) : (
-                customers.map((customer) => (
+                customers.map((customer: any) => ( // <- CHANGED TO any
                   <option key={customer.id} value={customer.id}>
                     {customer.name}
                   </option>
