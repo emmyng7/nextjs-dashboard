@@ -9,7 +9,7 @@ export interface Invoice {
   email: string;
   image_url: string;
   amount: number;
-  status: 'paid' | 'pending';
+  status: string; // CHANGED: Was 'paid' | 'pending', now just 'string'
   date: string;
 }
 
@@ -23,7 +23,7 @@ export async function fetchInvoices(): Promise<Invoice[]> {
   }
   
   const initial = [
-    { id: 1, customerId: 1, name: 'Michael Novotny', email: 'michael@novotny.com', image_url: '/customers/michael-novotny.png', amount: 40000, status: 'pending', date: '2024-12-15' },
+    { id: 1, customerId: 1, name: 'Michael Novotny', email: 'michael@novotny.com', image_url: '/customers/michael-novotny.png', amount: 40000, status: 'paid', date: '2024-12-15' },
     { id: 2, customerId: 2, name: 'John Doe', email: 'john@example.com', image_url: '/customers/amy-burns.png', amount: 25000, status: 'paid', date: '2024-08-15' },
   ];
   localStorage.setItem(STORAGE_KEY, JSON.stringify(initial));
