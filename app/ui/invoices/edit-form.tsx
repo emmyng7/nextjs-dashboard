@@ -15,10 +15,10 @@ export default function EditInvoiceForm({
   invoice,
   customers,
 }: {
-  invoice: any; // Changed to any
-  customers: any[]; // Changed to any[]
+  invoice: any;
+  customers: any[];
 }) {
-  const initialState: State = { message: null, errors: {} };
+  const initialState: any = { message: null, errors: {} }; // CHANGED TO ANY
   const updateInvoiceWithId = updateInvoice.bind(null, invoice.id);
   const [state, formAction] = useActionState(updateInvoiceWithId, initialState);
   
