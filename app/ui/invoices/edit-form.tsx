@@ -1,6 +1,5 @@
 'use client';
 
-import { CustomerField } from '@/app/lib/definitions';
 import {
   CheckIcon,
   ClockIcon,
@@ -12,7 +11,15 @@ import { Button } from '@/app/ui/button';
 import { updateInvoice, State } from '@/app/lib/actions';
 import { useActionState } from 'react';
 
-// Define the interface to match LocalStorage customers & invoices
+// Define interface to match customers from LocalStorage
+export interface CustomerLocal {
+  id: number;
+  name: string;
+  email?: string;
+  status?: string;
+}
+
+// Define interface to match invoices from LocalStorage
 export interface InvoiceLocal {
   id: number;
   customerId: number;
@@ -26,7 +33,7 @@ export default function EditInvoiceForm({
   customers,
 }: {
   invoice: InvoiceLocal;
-  customers: CustomerField[];
+  customers: CustomerLocal[];
 }) {
   const initialState: State = { message: null, errors: {} };
   const updateInvoiceWithId = updateInvoice.bind(null, invoice.id);
