@@ -11,17 +11,8 @@ import {
 } from '@heroicons/react/24/outline';
 import { Button } from '@/app/ui/button';
 
-// We are using 'any' so TypeScript stops complaining!
-interface CustomerField {
-  id: number;
-  name: string;
-  email?: string;
-  status?: string;
-  photo?: string;
-}
-
 export default function Form({ customers }: { customers: any[] }){ // <- CHANGED TO any[]
-  const initialState: State = { message: null, errors: {} };
+  const initialState: any = { message: null, errors: {} }; // Changed to any
   const [state, formAction] = useActionState(createInvoice, initialState); 
     
   
