@@ -29,7 +29,7 @@ export default function Page() {
           },
         ]}
       />
-      <Form customers={customers as any} />
+      <Form customers={customers} />
     </main>
   );
 }
