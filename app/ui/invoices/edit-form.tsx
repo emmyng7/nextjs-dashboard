@@ -11,29 +11,12 @@ import { Button } from '@/app/ui/button';
 import { updateInvoice, State } from '@/app/lib/actions';
 import { useActionState } from 'react';
 
-// Define interface to match customers from LocalStorage
-export interface CustomerLocal {
-  id: number;
-  name: string;
-  email?: string;
-  status?: string;
-}
-
-// Define interface to match invoices from LocalStorage
-export interface InvoiceLocal {
-  id: number;
-  customerId: number;
-  amount: number;
-  status: 'paid' | 'pending';
-  date: string;
-}
-
 export default function EditInvoiceForm({
   invoice,
   customers,
 }: {
-  invoice: InvoiceLocal;
-  customers: CustomerLocal[];
+  invoice: any; // Changed to any
+  customers: any[]; // Changed to any[]
 }) {
   const initialState: State = { message: null, errors: {} };
   const updateInvoiceWithId = updateInvoice.bind(null, invoice.id);
@@ -58,7 +41,7 @@ export default function EditInvoiceForm({
               <option value="" disabled>
                 Select a customer
               </option>
-              {customers.map((customer) => (
+              {customers.map((customer: any) => (
                 <option key={customer.id} value={customer.id}>
                   {customer.name}
                 </option>

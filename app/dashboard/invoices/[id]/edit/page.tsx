@@ -5,15 +5,15 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import Form from '@/app/ui/invoices/edit-form';
 import Breadcrumbs from '@/app/ui/invoices/breadcrumbs';
-import { fetchInvoiceById, Invoice } from '@/app/lib/services/invoiceService';
-import { fetchCustomers, Customer } from '@/app/lib/services/customerService';
+import { fetchInvoiceById } from '@/app/lib/services/invoiceService';
+import { fetchCustomers } from '@/app/lib/services/customerService';
 
 export default function Page() {
   const params = useParams();
   const invoiceId = Number(params.id);
 
-  const [invoice, setInvoice] = useState<Invoice | null>(null);
-  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [invoice, setInvoice] = useState<any>(null);
+  const [customers, setCustomers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
