@@ -56,7 +56,7 @@ export type InvoicesTable = {
 };
 
 export type CustomersTableType = {
-  id: string;
+  id: number;
   name: string;
   email: string;
   image_url: string;
