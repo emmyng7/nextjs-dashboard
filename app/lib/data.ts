@@ -13,7 +13,6 @@ import { formatCurrency } from './utils';
 
 export async function fetchRevenue() {
   try {
-    // Hardcoded demo data for the chart
     const revenue = [
       { month: 'Jan', revenue: 2000 },
       { month: 'Feb', revenue: 1800 },
@@ -58,7 +57,6 @@ export async function fetchLatestInvoices() {
 
 export async function fetchCardData() {
   try {
-    // Hardcoded data for the top 4 cards (Will be replaced by LocalStorage later)
     const numberOfInvoices = 6;
     const numberOfCustomers = 3;
     const totalPaidInvoices = formatCurrency(150000);
@@ -81,12 +79,46 @@ export async function fetchFilteredInvoices(
   query: string,
   currentPage: number,
 ) {
-  // We'll just return a dummy array for now
-  return [];
+  // HARDCODED DATA TO POPULATE THE INVOICE TABLE
+  const invoices = [
+    { id: 1, customer_id: 1, name: 'Michael Novotny', email: 'michael@novotny.com', image_url: '/customers/michael-novotny.png', amount: 40000, date: '2024-12-15', status: 'paid' },
+    { id: 2, customer_id: 2, name: 'Lee Robinson', email: 'lee@robinson.com', image_url: '/customers/lee-robinson.png', amount: 2000, date: '2024-11-20', status: 'pending' },
+    { id: 3, customer_id: 3, name: 'Balazs Orban', email: 'balazs@orban.com', image_url: '/customers/balazs-orban.png', amount: 10000, date: '2024-10-10', status: 'paid' },
+    { id: 4, customer_id: 4, name: 'Delba de Oliveira', email: 'delba@oliveira.com', image_url: '/customers/delba-de-oliveira.png', amount: 12000, date: '2024-09-22', status: 'pending' },
+    { id: 5, customer_id: 5, name: 'John Doe', email: 'john@example.com', image_url: '/customers/amy-burns.png', amount: 25000, date: '2024-08-15', status: 'paid' },
+    { id: 6, customer_id: 6, name: 'Jane Smith', email: 'jane@example.com', image_url: '/customers/evil-rabbit.png', amount: 5000, date: '2024-07-22', status: 'pending' },
+  ];
+
+  // Filter based on query
+  const filteredInvoices = invoices.filter((invoice) => {
+    if (!query) return true;
+    return (
+      invoice.name.toLowerCase().includes(query.toLowerCase()) ||
+      invoice.email.toLowerCase().includes(query.toLowerCase()) ||
+      invoice.status.toLowerCase().includes(query.toLowerCase())
+    );
+  });
+
+  const offset = (currentPage - 1) * ITEMS_PER_PAGE;
+  return filteredInvoices.slice(offset, offset + ITEMS_PER_PAGE);
 }
 
 export async function fetchInvoicesPages(query: string) {
-  return 1;
+  const invoices = [
+    { id: 1, name: 'Michael Novotny', email: 'michael@novotny.com', status: 'paid' },
+    { id: 2, name: 'Lee Robinson', email: 'lee@robinson.com', status: 'pending' },
+    { id: 3, name: 'Balazs Orban', email: 'balazs@orban.com', status: 'paid' },
+    { id: 4, name: 'Delba de Oliveira', email: 'delba@oliveira.com', status: 'pending' },
+    { id: 5, name: 'John Doe', email: 'john@example.com', status: 'paid' },
+    { id: 6, name: 'Jane Smith', email: 'jane@example.com', status: 'pending' },
+  ];
+
+  const filteredInvoices = invoices.filter((invoice) => {
+    if (!query) return true;
+    return invoice.name.toLowerCase().includes(query.toLowerCase()) || invoice.email.toLowerCase().includes(query.toLowerCase()) || invoice.status.toLowerCase().includes(query.toLowerCase());
+  });
+
+  return Math.ceil(filteredInvoices.length / ITEMS_PER_PAGE);
 }
 
 export async function fetchInvoiceById(id?: string) {
