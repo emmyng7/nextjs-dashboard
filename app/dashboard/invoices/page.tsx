@@ -10,7 +10,16 @@ export const metadata: Metadata = {
   title: 'Invoices',
 };
 
-export default async function Page() {
+export default async function Page(props: {
+  searchParams?: Promise<{
+    query?: string;
+    page?: string;
+  }>;
+}) {
+  const searchParams = await props.searchParams;
+  const query = searchParams?.query || '';
+  const currentPage = Number(searchParams?.page) || 1;
+
   return (
     <div className="w-full">
       <div className="flex w-full items-center justify-between">
@@ -20,8 +29,8 @@ export default async function Page() {
         <Search placeholder="Search invoices..." />
         <CreateInvoice />
       </div>
-      <Suspense fallback={<InvoicesTableSkeleton />}>
-        <Table />
+      <Suspense key={query + currentPage} fallback={<InvoicesTableSkeleton />}>
+        <Table query={query} currentPage={currentPage} />
       </Suspense>
     </div>
   );
