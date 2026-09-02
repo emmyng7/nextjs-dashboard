@@ -75,18 +75,19 @@ export async function fetchCardData() {
 }
 
 const ITEMS_PER_PAGE = 6;
+
 export async function fetchFilteredInvoices(
   query: string,
   currentPage: number,
 ) {
-  // HARDCODED DATA TO POPULATE THE INVOICE TABLE
+  // HARDCODED DATA TO POPULATE THE INVOICE TABLE - IDs ARE STRINGS
   const invoices = [
-    { id: 1, customer_id: 1, name: 'Michael Novotny', email: 'michael@novotny.com', image_url: '/customers/michael-novotny.png', amount: 40000, date: '2024-12-15', status: 'paid' },
-    { id: 2, customer_id: 2, name: 'Lee Robinson', email: 'lee@robinson.com', image_url: '/customers/lee-robinson.png', amount: 2000, date: '2024-11-20', status: 'pending' },
-    { id: 3, customer_id: 3, name: 'Balazs Orban', email: 'balazs@orban.com', image_url: '/customers/balazs-orban.png', amount: 10000, date: '2024-10-10', status: 'paid' },
-    { id: 4, customer_id: 4, name: 'Delba de Oliveira', email: 'delba@oliveira.com', image_url: '/customers/delba-de-oliveira.png', amount: 12000, date: '2024-09-22', status: 'pending' },
-    { id: 5, customer_id: 5, name: 'John Doe', email: 'john@example.com', image_url: '/customers/amy-burns.png', amount: 25000, date: '2024-08-15', status: 'paid' },
-    { id: 6, customer_id: 6, name: 'Jane Smith', email: 'jane@example.com', image_url: '/customers/evil-rabbit.png', amount: 5000, date: '2024-07-22', status: 'pending' },
+    { id: '1', customer_id: 1, name: 'Michael Novotny', email: 'michael@novotny.com', image_url: '/customers/michael-novotny.png', amount: 40000, date: '2024-12-15', status: 'paid' },
+    { id: '2', customer_id: 2, name: 'Lee Robinson', email: 'lee@robinson.com', image_url: '/customers/lee-robinson.png', amount: 2000, date: '2024-11-20', status: 'pending' },
+    { id: '3', customer_id: 3, name: 'Balazs Orban', email: 'balazs@orban.com', image_url: '/customers/balazs-orban.png', amount: 10000, date: '2024-10-10', status: 'paid' },
+    { id: '4', customer_id: 4, name: 'Delba de Oliveira', email: 'delba@oliveira.com', image_url: '/customers/delba-de-oliveira.png', amount: 12000, date: '2024-09-22', status: 'pending' },
+    { id: '5', customer_id: 5, name: 'John Doe', email: 'john@example.com', image_url: '/customers/amy-burns.png', amount: 25000, date: '2024-08-15', status: 'paid' },
+    { id: '6', customer_id: 6, name: 'Jane Smith', email: 'jane@example.com', image_url: '/customers/evil-rabbit.png', amount: 5000, date: '2024-07-22', status: 'pending' },
   ];
 
   // Filter based on query
@@ -105,12 +106,12 @@ export async function fetchFilteredInvoices(
 
 export async function fetchInvoicesPages(query: string) {
   const invoices = [
-    { id: 1, name: 'Michael Novotny', email: 'michael@novotny.com', status: 'paid' },
-    { id: 2, name: 'Lee Robinson', email: 'lee@robinson.com', status: 'pending' },
-    { id: 3, name: 'Balazs Orban', email: 'balazs@orban.com', status: 'paid' },
-    { id: 4, name: 'Delba de Oliveira', email: 'delba@oliveira.com', status: 'pending' },
-    { id: 5, name: 'John Doe', email: 'john@example.com', status: 'paid' },
-    { id: 6, name: 'Jane Smith', email: 'jane@example.com', status: 'pending' },
+    { id: '1', name: 'Michael Novotny', email: 'michael@novotny.com', status: 'paid' },
+    { id: '2', name: 'Lee Robinson', email: 'lee@robinson.com', status: 'pending' },
+    { id: '3', name: 'Balazs Orban', email: 'balazs@orban.com', status: 'paid' },
+    { id: '4', name: 'Delba de Oliveira', email: 'delba@oliveira.com', status: 'pending' },
+    { id: '5', name: 'John Doe', email: 'john@example.com', status: 'paid' },
+    { id: '6', name: 'Jane Smith', email: 'jane@example.com', status: 'pending' },
   ];
 
   const filteredInvoices = invoices.filter((invoice) => {
