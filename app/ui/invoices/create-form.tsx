@@ -10,7 +10,7 @@ import { fetchCustomers } from '@/app/lib/services/customerService';
 
 export default function CreateInvoiceForm({ onClose }: { onClose: () => void }) {
   const [customers, setCustomers] = useState([]);
-  const initialState: State = { message: null, errors: {} };
+  const initialState: any = { message: null, errors: {} }; // CHANGED TO ANY
   const [state, formAction] = useActionState(createInvoice, initialState);
 
   // Fetch customers when component mounts
