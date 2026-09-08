@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import Image from 'next/image';
 import { UpdateInvoice } from '@/app/ui/invoices/buttons';
 import DeleteButton from '@/app/ui/invoices/delete-button';
 import InvoiceStatus from '@/app/ui/invoices/status';
