@@ -10,17 +10,16 @@ import { fetchCustomers } from '@/app/lib/services/customerService';
 
 export default function CreateInvoiceForm({ onClose }: { onClose: () => void }) {
   const [customers, setCustomers] = useState([]);
+  const initialState: State = { message: null, errors: {} };
+  const [state, formAction] = useActionState(createInvoice, initialState);
 
-  // Fetch customers on component mount
+  // Fetch customers when component mounts
   useState(() => {
     fetchCustomers().then((data) => {
       const activeCustomers = data.filter((c: any) => c.status === 'active');
       setCustomers(activeCustomers);
     });
   });
-
-  const initialState: State = { message: null, errors: {} };
-  const [state, formAction] = useActionState(createInvoice, initialState);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
