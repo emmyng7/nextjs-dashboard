@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { createInvoice, State } from '@/app/lib/actions';
 import { useActionState } from 'react';
 import Link from 'next/link';
@@ -9,17 +9,17 @@ import { Button } from '@/app/ui/button';
 import { fetchCustomers } from '@/app/lib/services/customerService';
 
 export default function CreateInvoiceForm({ onClose }: { onClose: () => void }) {
-  const [customers, setCustomers] = useState([]);
-  const initialState: any = { message: null, errors: {} }; // CHANGED TO ANY
+  const [customers, setCustomers] = useState<any[]>([]); // CHANGED TO any[]
+  const initialState: any = { message: null, errors: {} };
   const [state, formAction] = useActionState(createInvoice, initialState);
 
   // Fetch customers when component mounts
-  useState(() => {
+  useEffect(() => {
     fetchCustomers().then((data) => {
       const activeCustomers = data.filter((c: any) => c.status === 'active');
       setCustomers(activeCustomers);
     });
-  });
+  }, []);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
