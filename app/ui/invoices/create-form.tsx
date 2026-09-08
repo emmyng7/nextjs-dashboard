@@ -1,139 +1,63 @@
-'use client'
+'use client';
 
+import { useState } from 'react';
 import { createInvoice, State } from '@/app/lib/actions';
 import { useActionState } from 'react';
 import Link from 'next/link';
-import {
-  CheckIcon,
-  ClockIcon,
-  BanknotesIcon,
-  UserCircleIcon,
-} from '@heroicons/react/24/outline';
+import { CheckIcon, ClockIcon, BanknotesIcon, UserCircleIcon } from '@heroicons/react/24/outline';
 import { Button } from '@/app/ui/button';
+import { fetchCustomers } from '@/app/lib/services/customerService';
 
-export default function Form({ customers }: { customers: any[] }){ // <- CHANGED TO any[]
-  const initialState: any = { message: null, errors: {} }; // Changed to any
-  const [state, formAction] = useActionState(createInvoice, initialState); 
-    
-  
+export default function CreateInvoiceForm({ onClose }: { onClose: () => void }) {
+  const [customers, setCustomers] = useState([]);
 
-  
+  // Fetch customers on component mount
+  useState(() => {
+    fetchCustomers().then((data) => {
+      const activeCustomers = data.filter((c: any) => c.status === 'active');
+      setCustomers(activeCustomers);
+    });
+  });
+
+  const initialState: State = { message: null, errors: {} };
+  const [state, formAction] = useActionState(createInvoice, initialState);
+
   return (
-    <form action={formAction}>
-      <div className="rounded-md bg-gray-50 p-4 md:p-6">
-        {/* Customer Name */}
-        <div className="mb-4">
-          <label htmlFor="customer" className="mb-2 block text-sm font-medium">
-            Choose customer
-          </label>
-          <div className="relative">
-            <select
-              id="customer"
-              name="customerId"
-              className="peer block w-full cursor-pointer rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
-              defaultValue=""
-              aria-describedby="customer-error"
-            >
-              <option value="" disabled>
-                Select a customer
-              </option>
-              {customers.length === 0 ? (
-                <option value="" disabled>
-                  No customers found - Please add one first
-                </option>
-              ) : (
-                customers.map((customer: any) => ( // <- CHANGED TO any
-                  <option key={customer.id} value={customer.id}>
-                    {customer.name}
-                  </option>
-                ))
-              )}
-            </select>
-            <UserCircleIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500" />
-          </div>
-        </div>
-        <div id="customer-error" aria-live="polite" aria-atomic="true">
-             {state.errors?.customerId &&
-             state.errors.customerId.map((error: string) => (
-            <p className="mt-2 text-sm text-red-500" key={error}>
-              {error}
-            </p>
-          ))}
-        </div>
- 
-        {/* Invoice Amount */}
-        <div className="mb-4">
-          <label htmlFor="amount" className="mb-2 block text-sm font-medium">
-            Choose an amount
-          </label>
-          <div className="relative mt-2 rounded-md">
-            <div className="relative">
-              <input
-                id="amount"
-                name="amount"
-                type="number"
-                step="0.01"
-                placeholder="Enter amount in Naira (₦)"
-                className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
-              />
-              <BanknotesIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
-              <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm font-medium text-gray-500">
-                ₦
-              </span>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+      <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
+        <form action={formAction}>
+          <div className="rounded-md bg-gray-50 p-4 md:p-6">
+            <div className="mb-4">
+              <label className="mb-2 block text-sm font-medium">Choose customer</label>
+              <select name="customerId" className="peer block w-full cursor-pointer rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2" defaultValue="">
+                <option value="" disabled>Select a customer</option>
+                {customers.map((customer: any) => (
+                  <option key={customer.id} value={customer.id}>{customer.name}</option>
+                ))}
+              </select>
             </div>
-          </div>
-        </div>
-
-        {/* Invoice Status */}
-        <fieldset>
-          <legend className="mb-2 block text-sm font-medium">
-            Set the invoice status
-          </legend>
-          <div className="rounded-md border border-gray-200 bg-white px-[14px] py-3">
-            <div className="flex gap-4">
-              <div className="flex items-center">
-                <input
-                  id="pending"
-                  name="status"
-                  type="radio"
-                  value="pending"
-                  className="h-4 w-4 cursor-pointer border-gray-300 bg-gray-100 text-gray-600 focus:ring-2"
-                />
-                <label
-                  htmlFor="pending"
-                  className="ml-2 flex cursor-pointer items-center gap-1.5 rounded-full bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-600"
-                >
-                  Pending <ClockIcon className="h-4 w-4" />
+            <div className="mb-4">
+              <label className="mb-2 block text-sm font-medium">Choose an amount</label>
+              <input name="amount" type="number" step="0.01" placeholder="Enter amount in Naira (₦)" className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2" />
+            </div>
+            <fieldset>
+              <legend className="mb-2 block text-sm font-medium">Set the invoice status</legend>
+              <div className="flex gap-4">
+                <label className="flex items-center">
+                  <input name="status" type="radio" value="pending" className="mr-2" /> Pending
+                </label>
+                <label className="flex items-center">
+                  <input name="status" type="radio" value="paid" className="mr-2" /> Paid
                 </label>
               </div>
-              <div className="flex items-center">
-                <input
-                  id="paid"
-                  name="status"
-                  type="radio"
-                  value="paid"
-                  className="h-4 w-4 cursor-pointer border-gray-300 bg-gray-100 text-gray-600 focus:ring-2"
-                />
-                <label
-                  htmlFor="paid"
-                  className="ml-2 flex cursor-pointer items-center gap-1.5 rounded-full bg-green-500 px-3 py-1.5 text-xs font-medium text-white"
-                >
-                  Paid <CheckIcon className="h-4 w-4" />
-                </label>
-              </div>
-            </div>
+            </fieldset>
           </div>
-        </fieldset>
+          <div className="mt-6 flex justify-end gap-4">
+            <button type="button" onClick={onClose} className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md">Cancel</button>
+            <Button type="submit">Create Invoice</Button>
+          </div>
+        </form>
       </div>
-      <div className="mt-6 flex justify-end gap-4">
-        <Link
-          href="/dashboard/invoices"
-          className="flex h-10 items-center rounded-lg bg-gray-100 px-4 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-200"
-        >
-          Cancel
-        </Link>
-        <Button type="submit">Create Invoice</Button>
-      </div>
-    </form>
+    </div>
   );
 }
