@@ -23,15 +23,16 @@ export const formatDateToLocal = (
 };
 
 export const generateYAxis = (revenue: Revenue[]) => {
-  // Calculate what labels we need to display on the y-axis
-  // based on highest record and in 1000s
   const yAxisLabels = [];
   const highestRecord = Math.max(...revenue.map((month) => month.revenue));
-  const topLabel = Math.ceil(highestRecord / 1000) * 1000;
 
-  for (let i = topLabel; i >= 0; i -= 1000) {
-    // CHANGED: Replaced $ with ₦
-    yAxisLabels.push(`₦${i / 1000}K`);
+  // If highest record is 0, use 1000 as base to avoid dividing by zero
+  const topLabel = highestRecord > 0 ? highestRecord : 1000;
+
+  // Create 6 evenly spaced labels
+  for (let i = 5; i >= 0; i--) {
+    const value = (topLabel / 5) * i;
+    yAxisLabels.push(`₦${(value / 1000).toFixed(0)}K`);
   }
 
   return { yAxisLabels, topLabel };

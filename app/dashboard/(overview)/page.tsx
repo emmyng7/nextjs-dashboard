@@ -7,16 +7,16 @@ import { Suspense } from 'react';
 import {
   RevenueChartSkeleton,
   CardsSkeleton,
+  LatestInvoicesSkeleton,
 } from '@/app/ui/skeletons';
  
 import { fetchLatestInvoices, fetchCardData } from '@/app/lib/data';
 
 export default async function Page() {
-    const latestInvoices = await fetchLatestInvoices();
     const {
       totalPaidInvoices,
       totalPendingInvoices,
-    } = await fetchCardData(); // This returns strings now
+    } = await fetchCardData();
  
   return (
     <main>
@@ -26,8 +26,8 @@ export default async function Page() {
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         <Suspense fallback={<CardsSkeleton />}>
           <CardWrapper 
-            totalPaidInvoices={totalPaidInvoices} // Accepts string
-            totalPendingInvoices={totalPendingInvoices} // Accepts string
+            totalPaidInvoices={totalPaidInvoices}
+            totalPendingInvoices={totalPendingInvoices}
           />
           <CustomerCount />
         </Suspense>
@@ -36,7 +36,9 @@ export default async function Page() {
          <Suspense fallback={<RevenueChartSkeleton />}>
           <RevenueChart />
         </Suspense>
-         <LatestInvoices latestInvoices={latestInvoices} />
+         <Suspense fallback={<LatestInvoicesSkeleton />}>
+          <LatestInvoices />
+        </Suspense>
       </div>
     </main>
   );

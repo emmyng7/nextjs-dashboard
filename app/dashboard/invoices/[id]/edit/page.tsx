@@ -24,8 +24,6 @@ export default function Page() {
           fetchCustomers()
         ]);
         setInvoice(invoiceData);
-        
-        // Only show active customers
         const activeCustomers = customerData.filter((c: any) => c.status === 'active');
         setCustomers(activeCustomers);
       } catch (error) {

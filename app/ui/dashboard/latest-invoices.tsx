@@ -1,15 +1,50 @@
+"use client";
+
 import { ArrowPathIcon } from '@heroicons/react/24/outline';
 import clsx from 'clsx';
-import Image from 'next/image';
 import { lusitana } from '@/app/ui/fonts';
-import { LatestInvoice } from '@/app/lib/definitions';
-import { fetchLatestInvoices } from '@/app/lib/data';
+import { formatCurrency, formatDateToLocal } from '@/app/lib/utils';
+import { useState, useEffect } from 'react';
+import { fetchInvoices, Invoice } from '@/app/lib/services/invoiceService';
 
-export default async function LatestInvoices({
-  latestInvoices,
-}: {
-  latestInvoices: LatestInvoice[];
-}) {
+export default function LatestInvoices() {
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadInvoices = async () => {
+      const data = await fetchInvoices();
+      // Sort by date descending and take the latest 5
+      const sorted = data.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      setInvoices(sorted.slice(0, 5));
+      setLoading(false);
+    };
+    loadInvoices();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex w-full flex-col md:col-span-4">
+        <h2 className={`${lusitana.className} mb-4 text-xl md:text-2xl`}>Latest Invoices</h2>
+        <div className="flex grow flex-col justify-between rounded-xl bg-gray-50 p-4">
+          <div className="bg-white px-6">
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="flex flex-row items-center justify-between border-t py-4 animate-pulse">
+                <div className="flex items-center">
+                  <div className="mr-4 h-8 w-8 rounded-full bg-gray-200"></div>
+                  <div className="min-w-0">
+                    <div className="h-4 bg-gray-200 rounded w-24"></div>
+                  </div>
+                </div>
+                <div className="h-4 bg-gray-200 rounded w-16"></div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex w-full flex-col md:col-span-4">
       <h2 className={`${lusitana.className} mb-4 text-xl md:text-2xl`}>
@@ -17,27 +52,18 @@ export default async function LatestInvoices({
       </h2>
       <div className="flex grow flex-col justify-between rounded-xl bg-gray-50 p-4">
         <div className="bg-white px-6">
-          {latestInvoices.map((invoice, i) => {
+          {invoices.map((invoice, i) => {
             return (
               <div
                 key={invoice.id}
                 className={clsx(
                   'flex flex-row items-center justify-between py-4',
-                  {
-                    'border-t': i !== 0,
-                  },
+                  { 'border-t': i !== 0 },
                 )}
               >
                 <div className="flex items-center">
-                  <div className="mr-4">
-                    {/* ALWAYS SHOW THE IMAGE */}
-                    <Image
-                      src={invoice.image_url}
-                      alt={`${invoice.name}'s profile picture`}
-                      className="rounded-full"
-                      width={32}
-                      height={32}
-                    />
+                  <div className="mr-4 h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center text-sm font-semibold">
+                    {invoice.name.charAt(0).toUpperCase()}
                   </div>
                   <div className="min-w-0">
                     <p className="truncate text-sm font-semibold md:text-base">
@@ -48,10 +74,8 @@ export default async function LatestInvoices({
                     </p>
                   </div>
                 </div>
-                <p
-                  className={`${lusitana.className} truncate text-sm font-medium md:text-base`}
-                >
-                  {invoice.amount}
+                <p className={`${lusitana.className} truncate text-sm font-medium md:text-base`}>
+                  {formatCurrency(invoice.amount)}
                 </p>
               </div>
             );

@@ -1,15 +1,18 @@
 'use client';
 
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useActionState } from 'react';
+import Link from 'next/link';
 import {
   CheckIcon,
   ClockIcon,
   BanknotesIcon,
   UserCircleIcon,
 } from '@heroicons/react/24/outline';
-import Link from 'next/link';
 import { Button } from '@/app/ui/button';
 import { updateInvoice, State } from '@/app/lib/actions';
-import { useActionState } from 'react';
+import toast from 'react-hot-toast';
 
 export default function EditInvoiceForm({
   invoice,
@@ -18,10 +21,21 @@ export default function EditInvoiceForm({
   invoice: any;
   customers: any[];
 }) {
-  const initialState: any = { message: null, errors: {} }; // CHANGED TO ANY
-  const updateInvoiceWithId = updateInvoice.bind(null, invoice.id);
-  const [state, formAction] = useActionState(updateInvoiceWithId, initialState);
-  
+  const router = useRouter();
+  const initialState: any = { message: null, errors: {} };
+  const updateInvoiceWithId = updateInvoice.bind(null, String(invoice.id));
+  const [state, formAction, isPending] = useActionState(updateInvoiceWithId, initialState);
+
+  // ALERT + REDIRECT ON SUCCESS
+  useEffect(() => {
+    if (state?.success) {
+      toast.success('Invoice updated successfully!');
+      setTimeout(() => {
+        router.push('/dashboard/invoices');
+        router.refresh();
+      }, 1500);
+    }
+  }, [state, router]);
 
   return (
     <form action={formAction}>
@@ -35,16 +49,12 @@ export default function EditInvoiceForm({
             <select
               id="customer"
               name="customerId"
-              className="peer block w-full cursor-pointer rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
+              className="peer block w-full cursor-pointer rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2"
               defaultValue={invoice.customerId}
             >
-              <option value="" disabled>
-                Select a customer
-              </option>
+              <option value="" disabled>Select a customer</option>
               {customers.map((customer: any) => (
-                <option key={customer.id} value={customer.id}>
-                  {customer.name}
-                </option>
+                <option key={customer.id} value={customer.id}>{customer.name}</option>
               ))}
             </select>
             <UserCircleIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500" />
@@ -65,52 +75,28 @@ export default function EditInvoiceForm({
                 step="0.01"
                 defaultValue={invoice.amount}
                 placeholder="Enter amount in Naira (₦)"
-                className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
+                className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2"
               />
-              <BanknotesIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
-              <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm font-medium text-gray-500">
-                ₦
-              </span>
+              <BanknotesIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500" />
+              <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm font-medium text-gray-500">₦</span>
             </div>
           </div>
         </div>
 
         {/* Invoice Status */}
         <fieldset>
-          <legend className="mb-2 block text-sm font-medium">
-            Set the invoice status
-          </legend>
+          <legend className="mb-2 block text-sm font-medium">Set the invoice status</legend>
           <div className="rounded-md border border-gray-200 bg-white px-[14px] py-3">
             <div className="flex gap-4">
               <div className="flex items-center">
-                <input
-                  id="pending"
-                  name="status"
-                  type="radio"
-                  value="pending"
-                  defaultChecked={invoice.status === 'pending'}
-                  className="h-4 w-4 cursor-pointer border-gray-300 bg-gray-100 text-gray-600 focus:ring-2"
-                />
-                <label
-                  htmlFor="pending"
-                  className="ml-2 flex cursor-pointer items-center gap-1.5 rounded-full bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-600"
-                >
+                <input id="pending" name="status" type="radio" value="pending" defaultChecked={invoice.status === 'pending'} className="h-4 w-4 cursor-pointer" />
+                <label htmlFor="pending" className="ml-2 flex cursor-pointer items-center gap-1.5 rounded-full bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-600">
                   Pending <ClockIcon className="h-4 w-4" />
                 </label>
               </div>
               <div className="flex items-center">
-                <input
-                  id="paid"
-                  name="status"
-                  type="radio"
-                  value="paid"
-                  defaultChecked={invoice.status === 'paid'}
-                  className="h-4 w-4 cursor-pointer border-gray-300 bg-gray-100 text-gray-600 focus:ring-2"
-                />
-                <label
-                  htmlFor="paid"
-                  className="ml-2 flex cursor-pointer items-center gap-1.5 rounded-full bg-green-500 px-3 py-1.5 text-xs font-medium text-white"
-                >
+                <input id="paid" name="status" type="radio" value="paid" defaultChecked={invoice.status === 'paid'} className="h-4 w-4 cursor-pointer" />
+                <label htmlFor="paid" className="ml-2 flex cursor-pointer items-center gap-1.5 rounded-full bg-green-500 px-3 py-1.5 text-xs font-medium text-white">
                   Paid <CheckIcon className="h-4 w-4" />
                 </label>
               </div>
@@ -119,13 +105,12 @@ export default function EditInvoiceForm({
         </fieldset>
       </div>
       <div className="mt-6 flex justify-end gap-4">
-        <Link
-          href="/dashboard/invoices"
-          className="flex h-10 items-center rounded-lg bg-gray-100 px-4 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-200"
-        >
+        <Link href="/dashboard/invoices" className="flex h-10 items-center rounded-lg bg-gray-100 px-4 text-sm font-medium text-gray-600 hover:bg-gray-200">
           Cancel
         </Link>
-        <Button type="submit">Edit Invoice</Button>
+        <Button type="submit" disabled={isPending}>
+          {isPending ? 'Updating...' : 'Edit Invoice'}
+        </Button>
       </div>
     </form>
   );

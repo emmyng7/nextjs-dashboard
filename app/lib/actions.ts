@@ -23,7 +23,6 @@ export async function authenticate(
   const password = formData.get('password') as string;
 
   try {
-    const users = await fetch('YOUR_DATABASE_ENDPOINT_HERE'); // Replace with your auth logic if needed!
     return 'Success';
   } catch (error) {
     console.error(error);
@@ -78,10 +77,11 @@ export async function createInvoice(prevState: State, formData: FormData) {
       status,
     });
 
-    return { message: 'Invoice created successfully.' };
+    // 3. Return SUCCESS so the form can redirect
+    return { message: 'Invoice created successfully.', success: true };
   } catch (error) {
     console.error(error);
-    return { message: 'Database Error: Failed to Create Invoice.' };
+    return { message: 'Database Error: Failed to Create Invoice.', success: false };
   }
 }
 
@@ -106,11 +106,9 @@ export async function updateInvoice(id: string, prevState: State, formData: Form
   }
 
   try {
-    // 1. Look up the customer by ID to get their name, email, and image
     const customers = await fetchCustomers();
     const customer = customers.find((c: Customer) => c.id === customerId);
 
-    // 2. Update the invoice WITH the customer's details
     await updateInvoiceLocal(Number(id), {
       customerId,
       name: customer?.name || 'Unknown Customer',
@@ -120,10 +118,10 @@ export async function updateInvoice(id: string, prevState: State, formData: Form
       status,
     });
 
-    return { message: 'Invoice updated successfully.' };
+    return { message: 'Invoice updated successfully.', success: true };
   } catch (error) {
     console.error(error);
-    return { message: 'Database Error: Failed to Update Invoice.' };
+    return { message: 'Database Error: Failed to Update Invoice.', success: false };
   }
 }
 
@@ -146,14 +144,7 @@ export async function createCustomerAction(prevState: State, formData: FormData)
   }
 
   try {
-    await createCustomer({
-      name,
-      email,
-      phone,
-      company,
-      address,
-      status,
-    } as any);
+    await createCustomer({ name, email, phone, company, address, status } as any);
     return { message: 'Customer created successfully.' };
   } catch (error) {
     console.error(error);
@@ -178,14 +169,7 @@ export async function updateCustomerAction(id: number, prevState: State, formDat
   }
 
   try {
-    await updateCustomer(id, {
-      name,
-      email,
-      phone,
-      company,
-      address,
-      status,
-    } as any);
+    await updateCustomer(id, { name, email, phone, company, address, status } as any);
     return { message: 'Customer updated successfully.' };
   } catch (error) {
     console.error(error);
