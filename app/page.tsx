@@ -29,17 +29,22 @@ export default function HomePage() {
       {/* HERO SECTION */}
       <section className="relative flex min-h-[85vh] flex-col items-center justify-center px-6 text-center">
 
-        {/* CEO Card */}
-        <div className="absolute right-6 top-6 hidden rounded-xl bg-white p-3 text-left shadow-2xl md:block">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600"></div>
-            <div>
-              <p className="text-xs font-semibold text-gray-900">Meet the CEO</p>
-              <p className="text-xs text-gray-500">GERALD NG</p>
-              <p className="text-[10px] uppercase text-gray-400">Founder</p>
-            </div>
-          </div>
-        </div>
+       {/* CEO Card */}
+<div className="absolute right-6 top-6 hidden rounded-xl bg-white p-3 text-left shadow-2xl md:block">
+  <div className="flex items-center gap-3">
+    {/* YOUR IMAGE HERE */}
+    <img 
+      src="emmanuelimg.jpg" 
+      alt="CEO"
+      className="h-10 w-10 rounded-full object-cover" 
+    />
+    <div>
+      <p className="text-xs font-semibold text-gray-900">Meet the CEO</p>
+      <p className="text-xs text-gray-500">Gerald NG</p>
+      <p className="text-[10px] uppercase text-gray-400">Founder</p>
+    </div>
+  </div>
+</div>
 
         {/* Small text top left */}
         <p className="mx-auto mb-10 max-w-md text-sm text-gray-400 md:max-w-lg">
@@ -80,11 +85,23 @@ export default function HomePage() {
       </section>
 
       {/* BOTTOM THUMBNAILS */}
-      <section className="grid grid-cols-3 gap-3 px-6 pb-12 md:px-12">
-        <div className="aspect-video rounded-xl bg-gradient-to-br from-blue-600 to-blue-900"></div>
-        <div className="aspect-video rounded-xl bg-gradient-to-br from-gray-800 to-gray-900"></div>
-        <div className="aspect-video rounded-xl bg-gradient-to-br from-blue-400 to-blue-800"></div>
-      </section>
+<section className="grid grid-cols-3 gap-3 px-6 pb-12 md:px-12">
+  <img 
+    src="hero-desktop.png" 
+    alt="Dashboard Preview" 
+    className="aspect-video w-full rounded-xl object-cover shadow-lg"
+  />
+  <img 
+    src="hero-mobile.png" 
+    alt="Invoices Preview" 
+    className="aspect-video w-full rounded-xl object-cover shadow-lg"
+  />
+  <img 
+    src="opengraph-image.png" 
+    alt="Customers Preview" 
+    className="aspect-video w-full rounded-xl object-cover shadow-lg"
+  />
+</section>
 
     </main>
   );
