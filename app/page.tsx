@@ -1,57 +1,91 @@
-import AcmeLogo from '@/app/ui/acme-logo';
-import { ArrowRightIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
-import styles from '@/app/ui/home.module.css';
 import { lusitana } from '@/app/ui/fonts';
-import Image from 'next/image';
 
-export default function Page() {
+export default function HomePage() {
   return (
-    <main className="flex min-h-screen flex-col p-6">
-      <div className="flex h-20 shrink-0 items-end rounded-lg bg-blue-500 p-4 md:h-52">
-        <AcmeLogo />
-        
-        {/* <AcmeLogo /> */}
-      </div>
-          
-      <div className="mt-4 flex grow flex-col gap-4 md:flex-row">
-        <div className="flex flex-col justify-center gap-6 rounded-lg bg-gray-50 px-6 py-10 md:w-2/5 md:px-20">
-          <p className={`text-xl text-gray-800 md:text-3xl md:leading-normal`}>
-            <strong>Welcome to Acme.</strong> This is the example for the{' '}
-            <a href="https://nextjs.org/learn/" className="text-blue-500">
-              Next.js Learn Course
-            </a>
-            , brought to you by Vercel.
+    <main className="min-h-screen bg-black text-white overflow-hidden">
 
-          </p>
-            <div
-             className="relative w-0 h-0 border-l-[15px] border-r-[15px] border-b-[26px] border-l-transparent border-r-transparent border-b-black"
-            />          
-          <Link
-            href="/login"
-            className="flex items-center gap-5 self-start rounded-lg bg-blue-500 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-blue-400 md:text-base"
-          >
-            <span>Log in</span> <ArrowRightIcon className="w-5 md:w-6" />
+      {/* NAVIGATION */}
+      <nav className="flex items-center justify-between px-6 py-6 md:px-12">
+        <div className="text-2xl font-bold tracking-tight">
+          <span className="text-blue-500">◆</span> INVOICE
+        </div>
+        <div className="hidden items-center gap-8 text-sm md:flex">
+          <Link href="/" className="text-gray-400 hover:text-white transition">
+            Home <span className="text-xs text-gray-600 ml-1">01</span>
+          </Link>
+          <Link href="/dashboard" className="text-gray-400 hover:text-white transition">
+            Dashboard <span className="text-xs text-gray-600 ml-1">02</span>
+          </Link>
+          <Link href="/dashboard/customers" className="text-gray-400 hover:text-white transition">
+            Customers <span className="text-xs text-gray-600 ml-1">03</span>
+          </Link>
+          <Link href="/login" className="text-gray-400 hover:text-white transition">
+            Contact <span className="text-xs text-gray-600 ml-1">04</span>
           </Link>
         </div>
-        <div className="flex items-center justify-center p-6 md:w-3/5 md:px-28 md:py-12">
-          {/* Add Hero Images Here */}
-        <Image
-          src="/hero-desktop.png"
-          width={1000}
-          height={760}
-          className="hidden md:block"
-          alt="Screenshots of the dashboard project showing desktop version"
-        />
-        <Image
-          src="/hero-mobile.png"
-          width={560}
-          height={620}
-          className="hidden md:block"
-          alt="Screenshots of the dashboard project showing desktop version"
-        />
+      </nav>
+
+      {/* HERO SECTION */}
+      <section className="relative flex min-h-[85vh] flex-col items-center justify-center px-6 text-center">
+
+        {/* CEO Card */}
+        <div className="absolute right-6 top-6 hidden rounded-xl bg-white p-3 text-left shadow-2xl md:block">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600"></div>
+            <div>
+              <p className="text-xs font-semibold text-gray-900">Meet the CEO</p>
+              <p className="text-xs text-gray-500">GERALD NG</p>
+              <p className="text-[10px] uppercase text-gray-400">Founder</p>
+            </div>
+          </div>
         </div>
-      </div>
+
+        {/* Small text top left */}
+        <p className="mx-auto mb-10 max-w-md text-sm text-gray-400 md:max-w-lg">
+          Create invoices, manage customers, and track your revenue — all in one place.
+          Built for Nigerian small business owners.
+        </p>
+
+        {/* Explore Link */}
+        <Link
+          href="/login"
+          className="mb-20 inline-flex items-center gap-2 border-b border-white pb-1 text-sm text-white transition hover:gap-4"
+        >
+          Explore Now →
+        </Link>
+
+        {/* BIG BRAND TEXT */}
+        <h1 className="select-none text-[18vw] font-black leading-none tracking-tighter">
+          INVOICE<span className="text-blue-500">X</span>
+        </h1>
+
+        {/* Bottom row */}
+        <div className="absolute bottom-6 left-6 flex items-center gap-4 text-xs text-gray-500 md:left-12">
+          <span>© 2026</span>
+          <span className="flex items-center gap-1">
+            <span className="h-2 w-px bg-gray-600"></span>
+            <span className="h-3 w-px bg-gray-600"></span>
+            <span className="h-4 w-px bg-gray-600"></span>
+            <span className="h-2 w-px bg-gray-600"></span>
+            <span className="h-1 w-px bg-gray-600"></span>
+          </span>
+          <span>20°</span>
+        </div>
+
+        <div className="absolute bottom-6 right-6 flex items-center gap-2 rounded-full bg-white px-3 py-1 text-xs font-medium text-black md:right-12">
+          Made with Next.js
+        </div>
+
+      </section>
+
+      {/* BOTTOM THUMBNAILS */}
+      <section className="grid grid-cols-3 gap-3 px-6 pb-12 md:px-12">
+        <div className="aspect-video rounded-xl bg-gradient-to-br from-blue-600 to-blue-900"></div>
+        <div className="aspect-video rounded-xl bg-gradient-to-br from-gray-800 to-gray-900"></div>
+        <div className="aspect-video rounded-xl bg-gradient-to-br from-blue-400 to-blue-800"></div>
+      </section>
+
     </main>
   );
 }
